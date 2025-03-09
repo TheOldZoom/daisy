@@ -15,7 +15,9 @@ class Client extends DiscordClient {
 
     constructor(options: ClientOptions) {
         super(options);
-        this.logs = Logger.getInstance();
+        this.logs = new Logger({
+            debug: process.env.NODE_ENV === 'development'
+        })
         this.commands = new Collection();
         this.events = new Collection();
         this.selfPrefixes = new Collection()

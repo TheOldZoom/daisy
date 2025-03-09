@@ -38,7 +38,7 @@ export default {
             remainingArgs.shift();
             currentCommand = subcommand;
         }
-
+        client.logs.info(`Command ${prefix + commandName} executed by ${message.author.tag} (${message.author.id}) on guild ${message.guild?.name} (${message.guild?.id})`);
         try {
             await currentCommand.execute(message, remainingArgs, client);
         } catch (error) {
