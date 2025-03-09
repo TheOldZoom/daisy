@@ -5,6 +5,7 @@ import { Message, EmbedBuilder, TextChannel } from 'discord.js';
 import Client from '../../struct/Client';
 import Colors from '../../utils/Colors';
 import userByCacheOrFetch from '../../utils/userByCacheOrFetch';
+import commas from '../../utils/commas';
 
 const FM_API_KEY = process.env.FM_KEY;
 const FM_API_URL = 'http://ws.audioscrobbler.com/2.0/';
@@ -125,10 +126,10 @@ export default new Command({
         url: userInfo?.user?.url,
       })
       .setDescription(
-        `**[${trackName}](${latestTrack.url})**\n\n**${artistName} ·** ${latestTrack.album['#text']}`,
+        `### [${trackName}](${latestTrack.url})\n\n**${artistName} ·** ${latestTrack.album['#text']}`,
       )
       .setFooter({
-        text: `Track Scrobbles: ${trackPlayCount} · Total Scrobbles: ${totalScrobbles}`,
+        text: `Track Scrobbles: ${commas(trackPlayCount)} · Total Scrobbles: ${commas(totalScrobbles)}`,
       });
 
     if (iconurl) embed.setThumbnail(iconurl);
