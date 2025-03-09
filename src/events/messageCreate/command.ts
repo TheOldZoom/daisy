@@ -5,14 +5,21 @@ import Colors from '../../utils/Colors';
 export default {
   async execute(message: Message, client: Client) {
     const prefixes = ['d!'];
-    const selfprefix = client.prefixes.get(message.author.id);
 
-    if (selfprefix) prefixes.push(selfprefix);
+    const userPrefix = client.prefixes.get(message.author.id);
+    if (userPrefix) prefixes.push(userPrefix);
+
+    if (message.guild) {
+      const guildPrefix = client.prefixes.get(message.guild.id);
+      if (guildPrefix) prefixes.push(guildPrefix);
+    }
 
     const messageContent = message.content.toLowerCase();
     const prefix = prefixes.find((p) => messageContent.startsWith(p));
 
     if (!prefix) return;
+
+
 
     const args = message.content.slice(prefix.length).trim().split(/\s+/);
     const commandName = args.shift()?.toLowerCase();
