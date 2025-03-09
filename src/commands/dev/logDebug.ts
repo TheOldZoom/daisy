@@ -1,7 +1,7 @@
 import Command from '../../struct/Command';
 
 export default new Command({
-  name: 'debug',
+  name: 'logDebug',
   description: 'Set or disable debug mode.',
   execute: async (message, args, client) => {
     client.logs.setDebug(!client.logs.debugOption);
@@ -9,4 +9,5 @@ export default new Command({
       `Debug mode has been ${client.logs.debugOption ? 'enabled' : 'disabled'}.`,
     );
   },
+  devOnly: true
 });
