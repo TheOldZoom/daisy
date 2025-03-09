@@ -1,9 +1,9 @@
-import discord, {
+import {
     ClientOptions,
     Collection,
     Client as DiscordClient,
 } from 'discord.js';
-import { Logger, LogLevel } from './Logger';
+import { Logger } from './Logger';
 import fs from 'fs';
 import path from 'path';
 
@@ -12,7 +12,9 @@ class Client extends DiscordClient {
     public commands: Collection<string, any>;
     public events: Collection<string, any>;
     public selfPrefixes: Collection<string, string>;
-    public devIds: string[] = [''];
+    public devId: string = "1041378399005978624";
+    public cooldowns: Collection<string, number>;
+
     constructor(options: ClientOptions) {
         super(options);
         this.logs = new Logger({
@@ -21,7 +23,7 @@ class Client extends DiscordClient {
         this.commands = new Collection();
         this.events = new Collection();
         this.selfPrefixes = new Collection();
-
+        this.cooldowns = new Collection();
     }
 
     async loadCommands(commandsPath?: string) {

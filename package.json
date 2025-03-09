@@ -12,7 +12,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "NODE_ENV=development tsx --watch src/index.ts"
+    "dev": "NODE_ENV=development tsx --watch src/index.ts",
+    "start": "NODE_ENV=production tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
