@@ -81,11 +81,10 @@ export default {
             });
         }
 
-        if (currentCommand.cooldown && client.cooldowns.has(command.name)) {
-            const expirationTime = client.cooldowns.get(command.name) as number;
+        if (currentCommand.cooldown && client.cooldowns.has(command.name + message.author.id)) {
+            const expirationTime = client.cooldowns.get(command.name + message.author.id) as number;
             const now = Math.floor(Date.now() / 1000);
             if (now < expirationTime / 1000) {
-                const timeLeft = expirationTime / 1000 - now;
                 return message.reply({
                     embeds: [
                         new EmbedBuilder()
@@ -99,7 +98,7 @@ export default {
 
 
         if (currentCommand.cooldown) {
-            client.cooldowns.set(command.name, Date.now() + currentCommand.cooldown * 1000);
+            client.cooldowns.set(command.name + message.author.id, Date.now() + currentCommand.cooldown * 1000);
         }
 
         client.logs.info(

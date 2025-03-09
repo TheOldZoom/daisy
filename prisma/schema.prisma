@@ -8,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id               String         @id // Unique Discord ID
+  id               String           @id // Unique Discord ID
   fmUser           String? // User's Lastfm user
   selfprefix       String? // User's custom prefix for bot commands
   blacklistedSince DateTime? // Date when the user was blacklisted
   timezone         String? // User's timezone
   birthday         String? // User's birthday
   messages         userMessages[] // One-to-many relation with `userMessages`
+  globalLevel      globalUserLevel? // One-to-one relation with global user level
+  guildLevels      guildUserLevel[] // One-to-many relation with guild-based user levels
 }
 
 model userMessages {
@@ -26,4 +28,40 @@ model userMessages {
   lastMessageAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model globalUserLevel {
+  id          Int      @id @default(autoincrement())
+  userId      String   @unique
+  level       Int      @default(0)
+  xp          Int      @default(0)
+  lastLevelUp DateTime
+  rank        Int?
+  bonusXP     Int      @default(0)
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model guildUserLevel {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  guildId     String
+  level       Int      @default(0)
+  xp          Int      @default(0)
+  lastLevelUp DateTime
+  rank        Int?
+  bonusXP     Int      @default(0)
+
+  user  User  @relation(fields: [userId], references: [id])
+  guild Guild @relation(fields: [guildId], references: [id])
+
+  @@unique([userId, guildId])
+}
+
+model Guild {
+  id     String  @id
+  name   String
+  prefix String?
+
+  guildLevels guildUserLevel[]
 }
