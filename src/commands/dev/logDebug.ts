@@ -9,5 +9,5 @@ export default new Command({
       `Debug mode has been ${client.logs.debugOption ? 'enabled' : 'disabled'}.`,
     );
   },
-  devOnly: true
+  devOnly: true,
 });
