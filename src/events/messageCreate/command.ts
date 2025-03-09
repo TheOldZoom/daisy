@@ -5,6 +5,7 @@ import Colors from '../../utils/Colors';
 export default {
   async execute(message: Message, client: Client) {
     if (message.author.bot || !message.inGuild()) return;
+
     const prefixes = ['d!'];
 
     const userPrefix = client.prefixes.get(message.author.id);
@@ -32,7 +33,7 @@ export default {
 
     let currentCommand = command;
     let remainingArgs = [...args];
-    const processedCommandPath = [commandName]
+    const processedCommandPath = [commandName];
 
     while (remainingArgs.length > 0) {
       const subcommandName = remainingArgs[0].toLowerCase();
@@ -48,7 +49,14 @@ export default {
       currentCommand = subcommand;
     }
 
-    if (currentCommand.devOnly && message.author.id !== client.devId) {
+    let fullCommand = prefix + processedCommandPath.join(' ');
+    if (remainingArgs.length > 0) {
+      fullCommand += ' ' + remainingArgs.join(' ');
+    }
+    if (command.devOnly && message.author.id !== client.devId) {
+      client.logs.info(
+        `${message.author.tag} (${message.author.id}) tried to execute command ${fullCommand} in guild ${message.guild?.name} (${message.guild?.id})`,
+      );
       return message.reply({
         embeds: [
           new EmbedBuilder()
@@ -122,11 +130,21 @@ export default {
       );
     }
 
-    let fullCommand = prefix + processedCommandPath.join(' ');
 
-    if (remainingArgs.length > 0) {
-      fullCommand += ' ' + remainingArgs.join(' ');
+
+    if (!currentCommand.execute) {
+      const helpEmbed = new EmbedBuilder()
+        .setTitle(`Help: ${processedCommandPath.join(' ')}`)
+        .setDescription(command.example)
+        .addFields(
+          { name: 'Usage', value: `${prefix}${processedCommandPath.join(' ')} [subcommand] [options]` },
+          { name: 'Subcommands', value: currentCommand.subs.length > 0 ? currentCommand.subs.map((sub: any) => sub.name).join(', ') : 'None' },
+        )
+        .setColor(Colors.hotPinkPop);
+
+      return message.reply({ embeds: [helpEmbed] });
     }
+
 
     client.logs.info(
       `Command ${fullCommand} executed by ${message.author.tag} (${message.author.id}) on guild ${message.guild?.name} (${message.guild?.id})`,
@@ -136,7 +154,7 @@ export default {
       await currentCommand.execute(message, remainingArgs, client);
     } catch (error) {
       client.logs.error(`Error executing command ${commandName}`);
-      console.error(error);
+      client.logs.error(error);
 
       try {
         await message.reply({

@@ -33,7 +33,7 @@ class Logger {
       [LogLevel.ERROR]: chalk.red,
       [LogLevel.WARN]: chalk.yellow,
       [LogLevel.LOG]: chalk.green,
-      [LogLevel.DEBUG]: chalk.blue,
+      [LogLevel.DEBUG]: chalk.magenta,
       [LogLevel.INFO]: chalk.blueBright,
     };
     return colorMap[level] || chalk.white;

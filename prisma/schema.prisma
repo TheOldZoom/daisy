@@ -65,3 +65,10 @@ model guild {
   blacklistedSince DateTime?
   guildLevels      guildUserLevel[]
 }
+
+model Status {
+  id   Int     @id @default(autoincrement())
+  text String
+  type String
+  url  String?
+}

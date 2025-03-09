@@ -23,7 +23,7 @@ export interface CommandOptions {
   name: string;
   description?: string;
   aliases?: string[];
-  execute: (message: Message, args: string[], client: Client) => void;
+  execute?: (message: Message, args: string[], client: Client) => void;
   subs?: Subcommand[];
   devOnly?: boolean;
   botPermissions?: PermissionResolvable[];
@@ -37,7 +37,7 @@ class Command {
   public name: string;
   public description: string;
   public aliases: string[];
-  public execute: (message: Message, args: string[], client: Client) => void;
+  public execute?: (message: Message, args: string[], client: Client) => void;
   public subs: Subcommand[];
   public devOnly?: boolean;
   public botPermissions?: PermissionResolvable[];
