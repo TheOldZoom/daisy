@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^18.0.0",
     "@types/chalk": "^0.4.31",
     "eslint-config-prettier": "^10.1.1",
     "prettier": "^3.5.3",
@@ -24,6 +26,7 @@
     "chalk": "^5.4.1",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "moment-timezone": "^0.5.47"
   }
 }
