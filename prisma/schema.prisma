@@ -60,7 +60,7 @@ model guildUserLevel {
 
 model guild {
   id               String           @id
-  name             String
+  name             String?
   prefix           String?
   blacklistedSince DateTime?
   guildLevels      guildUserLevel[]

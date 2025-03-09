@@ -53,7 +53,7 @@ export default new Command({
           update: { selfprefix: prefix },
           create: { id, selfprefix: prefix },
         });
-        client.selfPrefixes.set(id, prefix);
+        client.prefixes.set(id, prefix);
         embed.setDescription(`Your prefix has been set to \`${prefix}\`.`);
         await message.reply({ embeds: [embed] });
       },
@@ -69,7 +69,7 @@ export default new Command({
           where: { id },
           data: { selfprefix: null },
         });
-
+        client.prefixes.delete(id);
         embed.setDescription('Your self prefix has been removed.');
         await message.reply({ embeds: [embed] });
       },

@@ -4,22 +4,19 @@ import Colors from '../../utils/Colors';
 
 export default {
   async execute(message: Message, client: Client) {
+    if (message.author.bot || !message.inGuild()) return;
     const prefixes = ['d!'];
 
     const userPrefix = client.prefixes.get(message.author.id);
     if (userPrefix) prefixes.push(userPrefix);
 
-    if (message.guild) {
-      const guildPrefix = client.prefixes.get(message.guild.id);
-      if (guildPrefix) prefixes.push(guildPrefix);
-    }
+    const guildPrefix = client.prefixes.get(message.guild.id);
+    if (guildPrefix) prefixes.push(guildPrefix);
 
     const messageContent = message.content.toLowerCase();
     const prefix = prefixes.find((p) => messageContent.startsWith(p));
 
     if (!prefix) return;
-
-
 
     const args = message.content.slice(prefix.length).trim().split(/\s+/);
     const commandName = args.shift()?.toLowerCase();
@@ -35,6 +32,7 @@ export default {
 
     let currentCommand = command;
     let remainingArgs = [...args];
+    const processedCommandPath = [commandName]
 
     while (remainingArgs.length > 0) {
       const subcommandName = remainingArgs[0].toLowerCase();
@@ -43,6 +41,8 @@ export default {
       if (!subcommand) {
         break;
       }
+
+      processedCommandPath.push(subcommandName);
 
       remainingArgs.shift();
       currentCommand = subcommand;
@@ -122,8 +122,14 @@ export default {
       );
     }
 
+    let fullCommand = prefix + processedCommandPath.join(' ');
+
+    if (remainingArgs.length > 0) {
+      fullCommand += ' ' + remainingArgs.join(' ');
+    }
+
     client.logs.info(
-      `Command ${prefix + commandName} executed by ${message.author.tag} (${message.author.id}) on guild ${message.guild?.name} (${message.guild?.id})`,
+      `Command ${fullCommand} executed by ${message.author.tag} (${message.author.id}) on guild ${message.guild?.name} (${message.guild?.id})`,
     );
 
     try {
