@@ -5,7 +5,6 @@ enum LogLevel {
   ERROR = 'error',
   WARN = 'warn',
   DEBUG = 'debug',
-  VERBOSE = 'verbose',
   INFO = 'info',
 }
 
@@ -35,7 +34,6 @@ class Logger {
       [LogLevel.WARN]: chalk.yellow,
       [LogLevel.LOG]: chalk.green,
       [LogLevel.DEBUG]: chalk.blue,
-      [LogLevel.VERBOSE]: chalk.magenta,
       [LogLevel.INFO]: chalk.blueBright,
     };
     return colorMap[level] || chalk.white;
@@ -44,9 +42,16 @@ class Logger {
   private formatMessage(level: LogLevel, context?: string): string {
     const now = new Date();
     const timestamp = `[${now.toLocaleDateString('en-GB')} ${now.toLocaleTimeString('en-GB')}]`;
+
+    const maxLevelLength = Math.max(...Object.values(LogLevel).map(l => l.length));
+    const levelText = `[${level.toUpperCase()}]`.padEnd(maxLevelLength + 2);
+    const coloredLevel = this.getLevelColor(level)(levelText);
+
     const contextText = context ? `[${context}] ` : '';
-    return `${chalk.gray(timestamp)} ${this.getLevelColor(level)(`[${level.toUpperCase()}]`)} ${chalk.cyan(contextText)}`;
+    return `${chalk.gray(timestamp)} ${coloredLevel} ${chalk.cyan(contextText)}`;
   }
+
+
 
   private logMessage(level: LogLevel, ...args: any[]) {
     const prefix = this.formatMessage(level, this.context);
@@ -79,9 +84,7 @@ class Logger {
     if (this.debugOption) this.logMessage(LogLevel.DEBUG, ...args);
   }
 
-  verbose(...args: any[]) {
-    this.logMessage(LogLevel.VERBOSE, ...args);
-  }
+
 
   info(...args: any[]) {
     this.logMessage(LogLevel.INFO, ...args);
@@ -103,9 +106,6 @@ class Logger {
     this.getInstance().debug(...args);
   }
 
-  static verbose(...args: any[]) {
-    this.getInstance().verbose(...args);
-  }
 
   static info(...args: any[]) {
     this.getInstance().info(...args);

@@ -5,7 +5,7 @@ import Colors from '../../utils/Colors';
 export default {
   async execute(message: Message, client: Client) {
     const prefixes = ['d!'];
-    const selfprefix = client.selfPrefixes.get(message.author.id);
+    const selfprefix = client.prefixes.get(message.author.id);
 
     if (selfprefix) prefixes.push(selfprefix);
 

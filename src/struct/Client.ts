@@ -7,7 +7,7 @@ class Client extends DiscordClient {
   public logs: Logger;
   public commands: Collection<string, any>;
   public events: Collection<string, any>;
-  public selfPrefixes: Collection<string, string>;
+  public prefixes: Collection<string, string>;
   public devId: string = '1041378399005978624';
   public cooldowns: Collection<string, number>;
 
@@ -18,7 +18,7 @@ class Client extends DiscordClient {
     });
     this.commands = new Collection();
     this.events = new Collection();
-    this.selfPrefixes = new Collection();
+    this.prefixes = new Collection();
     this.cooldowns = new Collection();
   }
 
