@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model user {
   id               String           @id // Unique Discord ID
   fmUser           String? // User's Lastfm user
   selfprefix       String? // User's custom prefix for bot commands
@@ -27,7 +27,7 @@ model userMessages {
   wordCount     Int      @default(0)
   lastMessageAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user user @relation(fields: [userId], references: [id])
 }
 
 model globalUserLevel {
@@ -39,7 +39,7 @@ model globalUserLevel {
   rank        Int?
   bonusXP     Int      @default(0)
 
-  user User @relation(fields: [userId], references: [id])
+  user user @relation(fields: [userId], references: [id])
 }
 
 model guildUserLevel {
@@ -52,13 +52,13 @@ model guildUserLevel {
   rank        Int?
   bonusXP     Int      @default(0)
 
-  user  User  @relation(fields: [userId], references: [id])
-  guild Guild @relation(fields: [guildId], references: [id])
+  user  user  @relation(fields: [userId], references: [id])
+  guild guild @relation(fields: [guildId], references: [id])
 
   @@unique([userId, guildId])
 }
 
-model Guild {
+model guild {
   id     String  @id
   name   String
   prefix String?
