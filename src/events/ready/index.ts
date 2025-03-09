@@ -9,6 +9,8 @@ export default async (client: Client) => {
   );
   const users = await prisma.user.findMany();
   client.logs.debug(`Loaded ${users.length} users from the database.`);
+  client.logs.debug(users)
+  client.logs.debug('Loading self prefixes...');
   users.forEach((u) => {
     if (!u.selfprefix) return;
     if (u.blacklistedSince) return;

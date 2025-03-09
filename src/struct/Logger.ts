@@ -41,73 +41,74 @@ class Logger {
     return colorMap[level] || chalk.white;
   }
 
-  private formatMessage(
-    level: LogLevel,
-    message: string,
-    context?: string,
-  ): string {
+  private formatMessage(level: LogLevel, context?: string): string {
     const now = new Date();
     const timestamp = `[${now.toLocaleDateString('en-GB')} ${now.toLocaleTimeString('en-GB')}]`;
     const contextText = context ? `[${context}] ` : '';
-    return `${chalk.gray(timestamp)} ${this.getLevelColor(level)(`[${level.toUpperCase()}]`)} ${chalk.cyan(contextText)}${message}`;
+    return `${chalk.gray(timestamp)} ${this.getLevelColor(level)(`[${level.toUpperCase()}]`)} ${chalk.cyan(contextText)}`;
   }
 
-  private logMessage(level: LogLevel, message: string, context?: string) {
-    console.log(this.formatMessage(level, message, context || this.context));
+  private logMessage(level: LogLevel, ...args: any[]) {
+    const prefix = this.formatMessage(level, this.context);
+
+    if (args.length === 1 && Array.isArray(args[0])) {
+      console.log(prefix);
+      console.table(args[0]);
+    } else {
+      console.log(prefix, ...args);
+    }
   }
 
   setDebug(debug: boolean) {
     this.debugOption = debug;
   }
 
-  error(message: string, trace?: string, context?: string) {
-    this.logMessage(LogLevel.ERROR, message, context);
-    if (trace) this.logMessage(LogLevel.ERROR, trace, context);
+  error(...args: any[]) {
+    this.logMessage(LogLevel.ERROR, ...args);
   }
 
-  warn(message: string, context?: string) {
-    this.logMessage(LogLevel.WARN, message, context);
+  warn(...args: any[]) {
+    this.logMessage(LogLevel.WARN, ...args);
   }
 
-  log(message: string, context?: string) {
-    this.logMessage(LogLevel.LOG, message, context);
+  log(...args: any[]) {
+    this.logMessage(LogLevel.LOG, ...args);
   }
 
-  debug(message: string, context?: string) {
-    if (this.debugOption) this.logMessage(LogLevel.DEBUG, message, context);
+  debug(...args: any[]) {
+    if (this.debugOption) this.logMessage(LogLevel.DEBUG, ...args);
   }
 
-  verbose(message: string, context?: string) {
-    this.logMessage(LogLevel.VERBOSE, message, context);
+  verbose(...args: any[]) {
+    this.logMessage(LogLevel.VERBOSE, ...args);
   }
 
-  info(message: string, context?: string) {
-    this.logMessage(LogLevel.INFO, message, context);
+  info(...args: any[]) {
+    this.logMessage(LogLevel.INFO, ...args);
   }
 
-  // Static methods to allow direct usage
-  static error(message: string, trace?: string, context?: string) {
-    this.getInstance().error(message, trace, context);
+  static error(...args: any[]) {
+    this.getInstance().error(...args);
   }
 
-  static warn(message: string, context?: string) {
-    this.getInstance().warn(message, context);
+  static warn(...args: any[]) {
+    this.getInstance().warn(...args);
   }
 
-  static log(message: string, context?: string) {
-    this.getInstance().log(message, context);
+  static log(...args: any[]) {
+    this.getInstance().log(...args);
   }
 
-  static debug(message: string, context?: string) {
-    this.getInstance().debug(message, context);
+  static debug(...args: any[]) {
+    this.getInstance().debug(...args);
   }
 
-  static verbose(message: string, context?: string) {
-    this.getInstance().verbose(message, context);
+  static verbose(...args: any[]) {
+    this.getInstance().verbose(...args);
   }
 
-  static info(message: string, context?: string) {
-    this.getInstance().info(message, context);
+  static info(...args: any[]) {
+    this.getInstance().info(...args);
   }
 }
 
