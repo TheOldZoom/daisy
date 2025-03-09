@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String         @id // Unique Discord ID
+  fmUser           String? // User's Lastfm user
+  selfprefix       String? // User's custom prefix for bot commands
+  blacklistedSince DateTime? // Date when the user was blacklisted
+  timezone         String? // User's timezone
+  birthday         String? // User's birthday
+  messages         userMessages[] // One-to-many relation with `userMessages`
+}
+
+model userMessages {
+  id            Int      @id @default(autoincrement())
+  guildId       String
+  userId        String
+  total         Int      @default(0)
+  wordCount     Int      @default(0)
+  lastMessageAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
