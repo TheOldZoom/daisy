@@ -18,7 +18,7 @@ Join the [Discord Server](https://discord.gg/GYusH2ZTyJ) as well.
 - [ ] Implement a feature to track user activity and generate reports.
 - [ ] Add localization support for multiple languages.
 - [ ] Improve the logging system to include more detailed information.
-- [ ] Refactor the codebase to improve readability and maintainability.
+- [x] Refactor the codebase to improve readability and maintainability.
 - [ ] Add a feature to allow users to set reminders and notifications.
 - [ ] Add a feature to allow server admins to create and manage custom commands.
 - [ ] Implement a permission system to control access to commands and features.
