@@ -29,7 +29,6 @@ export default {
         let currentCommand = command;
         let remainingArgs = [...args];
 
-        // Handle subcommands
         while (remainingArgs.length > 0) {
             const subcommandName = remainingArgs[0].toLowerCase();
             const subcommand = currentCommand.getSubcommand?.(subcommandName);
@@ -42,7 +41,6 @@ export default {
             currentCommand = subcommand;
         }
 
-        // Dev-only check
         if (currentCommand.devOnly && message.author.id !== client.devId) {
             return message.reply({
                 embeds: [
@@ -53,7 +51,6 @@ export default {
             });
         }
 
-        // User permission check
         if (currentCommand.userPermissions && !message.member?.permissions.has(currentCommand.userPermissions)) {
             const missingPermissions = currentCommand.userPermissions.filter(
                 (perm: any) => !message.member?.permissions.has(perm)
@@ -69,7 +66,6 @@ export default {
             });
         }
 
-        // Bot permission check
         if (currentCommand.botPermissions && !message.guild?.members.me?.permissions.has(currentCommand.botPermissions)) {
             const missingPermissions = currentCommand.botPermissions.filter(
                 (perm: any) => !message.guild?.members.me?.permissions.has(perm)
@@ -85,26 +81,27 @@ export default {
             });
         }
 
-        const now = Date.now();
         if (currentCommand.cooldown && client.cooldowns.has(command.name)) {
             const expirationTime = client.cooldowns.get(command.name) as number;
-            if (now < expirationTime) {
-                const timeLeft = (expirationTime - now) / 1000;
+            const now = Math.floor(Date.now() / 1000);
+            if (now < expirationTime / 1000) {
+                const timeLeft = expirationTime / 1000 - now;
                 return message.reply({
                     embeds: [
                         new EmbedBuilder()
-                            .setDescription(`Please wait ${timeLeft.toFixed(1)} more seconds before using this command again.`)
+                            .setDescription(`Please wait <t:${Math.floor(expirationTime / 1000)}:R> before using this command again.`)
                             .setColor(Colors.hotPinkPop),
                     ],
                 });
             }
         }
 
+
+
         if (currentCommand.cooldown) {
-            client.cooldowns.set(command.name, now + currentCommand.cooldown * 1000);
+            client.cooldowns.set(command.name, Date.now() + currentCommand.cooldown * 1000);
         }
 
-        // Log command execution
         client.logs.info(
             `Command ${prefix + commandName} executed by ${message.author.tag} (${message.author.id}) on guild ${message.guild?.name} (${message.guild?.id})`,
         );
