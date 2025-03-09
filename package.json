@@ -4,6 +4,7 @@
   "main": "index.js",
   "devDependencies": {
     "@types/chalk": "^0.4.31",
+    "eslint-config-prettier": "^10.1.1",
     "prettier": "^3.5.3",
     "prisma": "^6.4.1",
     "tsx": "^4.19.3",
