@@ -2,15 +2,15 @@ import chalk from 'chalk';
 
 enum LogLevel { LOG = 'log', ERROR = 'error', WARN = 'warn', DEBUG = 'debug', VERBOSE = 'verbose', INFO = "info" }
 
-interface LoggerOptions { logLevel?: LogLevel; context?: string; }
+interface LoggerOptions { context?: string; debug?: boolean; }
 
 class Logger {
     private static instance: Logger;
-    private logLevel: LogLevel;
+    private debugOption?: boolean;
     private context?: string;
 
     constructor(options: LoggerOptions = {}) {
-        this.logLevel = options.logLevel || LogLevel.LOG;
+        this.debugOption = options.debug || false;
         this.context = options.context;
     }
 
@@ -39,8 +39,11 @@ class Logger {
     }
 
     private logMessage(level: LogLevel, message: string, context?: string) {
-        // Always log regardless of the level
         console.log(this.formatMessage(level, message, context || this.context));
+    }
+
+    setDebug(debug: boolean) {
+        this.debugOption = debug;
     }
 
     error(message: string, trace?: string, context?: string) {
@@ -57,7 +60,7 @@ class Logger {
     }
 
     debug(message: string, context?: string) {
-        this.logMessage(LogLevel.DEBUG, message, context);
+        if (this.debugOption) this.logMessage(LogLevel.DEBUG, message, context);
     }
 
     verbose(message: string, context?: string) {
