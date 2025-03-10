@@ -8,7 +8,6 @@ Join the [Discord Server](https://discord.gg/GYusH2ZTyJ) as well.
 
 # TODO
 
-- [ ] Implement unit tests for all commands and utilities.
 - [ ] Add error handling and logging for all API requests.
 - [x] Improve the command handling system to support nested subcommands.
 - [ ] Add more detailed documentation for each command and utility function.
@@ -23,6 +22,7 @@ Join the [Discord Server](https://discord.gg/GYusH2ZTyJ) as well.
 - [ ] Add a feature to allow server admins to create and manage custom commands.
 - [x] Implement a permission system to control access to commands and features.
 - [ ] Add a feature to allow users to manage their profiles and settings.
+- [ ] Improve userInfo command.
 
 ## License
 

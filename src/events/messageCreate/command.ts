@@ -24,7 +24,7 @@ export default {
       }
     }
 
-    const prefixes = ['d.'];
+    const prefixes = [client.prefix];
 
     const userPrefix = client.prefixes.get(message.author.id);
     if (userPrefix) prefixes.push(userPrefix);

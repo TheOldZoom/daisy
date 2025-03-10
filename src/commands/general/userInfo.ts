@@ -6,48 +6,61 @@ import prisma from '../../struct/prisma';
 
 export default new Command({
     name: 'userinfo',
-    description: 'Ping the bot and get a response.',
+    description: 'Displays information about a user.',
     aliases: ['ui', 'user', 'u'],
     execute: async (message, args, client) => {
         const target = args[0] ? getUserId(args[0]) : message.author.id;
-        const User = await client.users.fetch(target as string, { force: true }).catch(() => null);
 
-        if (!User) return message.reply({
-            embeds: [new EmbedBuilder().setColor(Colors.hotPinkPop).setDescription('User not found.')]
-        });
+        if (!target) return;
 
-        const userDB = await prisma.user.findFirst({
-            where: { id: target as string }
-        });
+        const user = await client.users.fetch(target, { force: true }).catch(() => null);
 
-        const userProfile = await User.fetch(true).catch(() => null);
+        if (!user) {
+            return message.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor(Colors.hotPinkPop)
+                        .setDescription('❌ User not found.')
+                ]
+            });
+        }
 
-        const displayName = User.globalName ?? User.username;
+        const [userDB, userProfile] = await Promise.all([
+            prisma.user.findUnique({
+                where: { id: target }
+            }),
+            user.fetch(true).catch(() => null)
+        ]);
+
+        const displayName = user.globalName ?? user.username;
         const lastFmUser = userDB?.fmUser ?? "Not set";
-
         const timezone = userDB?.timezone ?? "Not set";
         const birthday = userDB?.birthday ?? "Not set";
+        const createdAt = `<t:${Math.floor(user.createdTimestamp / 1000)}:R>`;
 
-        const createdAt = `<t:${Math.floor(User.createdTimestamp / 1000)}:F>`;
-        const bannerURL = userProfile?.bannerURL();
+        const bannerURL = userProfile?.bannerURL({ size: 4096 }) || null;
+        const avatarURL = user.displayAvatarURL({ size: 1024 });
 
-
+        const embedColor = Colors.sunshineYellow;
         const embed = new EmbedBuilder()
             .setAuthor({
-                name: `${User.username} (${User.id})`,
-                iconURL: User.displayAvatarURL() || undefined,
+                name: `${user.username} (${user.id})`,
+                iconURL: avatarURL
             })
-            .setColor(userProfile?.accentColor ?? Colors.sunshineYellow)
+            .setColor(embedColor)
             .setDescription(`
-        **Display Name:** ${displayName}
-        **Last.fm:** ${lastFmUser}
-        **Timezone:** ${timezone}
-        **Birthday:** ${birthday}
-        **Created At:** ${createdAt}
-    `).setThumbnail(User.avatarURL()).setImage(bannerURL as string).setColor(Colors.sunshineYellow)
+            **Display Name:** ${displayName}
+            **Last.fm:** ${lastFmUser}
+            **Timezone:** ${timezone}
+            **Birthday:** ${birthday}
+            **Account Created:** ${createdAt}
+            `).setThumbnail(avatarURL);
 
-        message.reply({ embeds: [embed] });
+        if (bannerURL) {
+            embed.setImage(bannerURL);
+        }
+
+        await message.reply({ embeds: [embed] });
 
     },
-
 });
