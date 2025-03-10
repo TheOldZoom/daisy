@@ -1,12 +1,30 @@
-import { EmbedBuilder, Message } from 'discord.js';
+import { EmbedBuilder, Message, TextChannel } from 'discord.js';
 import Client from '../../struct/Client';
 import Colors from '../../utils/Colors';
+import getAIResponse from '../../utils/getAIResponse';
 
 export default {
   async execute(message: Message, client: Client) {
     if (message.author.bot || !message.inGuild()) return;
 
-    const prefixes = ['d!'];
+    const botMention = `<@${client.user?.id}>`;
+    if (message.content.toLowerCase().startsWith(botMention.toLowerCase())) {
+      const question = message.content.slice(botMention.length).trim();
+
+      if (question) {
+        return handleAIReply(message, client, question);
+      }
+    }
+
+    if (message.reference && message.reference.messageId) {
+      const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
+      if (repliedMessage.author.bot && repliedMessage.author.id === client.user?.id) {
+        const question = message.content;
+        return handleAIReply(message, client, question);
+      }
+    }
+
+    const prefixes = ['d.'];
 
     const userPrefix = client.prefixes.get(message.author.id);
     if (userPrefix) prefixes.push(userPrefix);
@@ -17,7 +35,24 @@ export default {
     const messageContent = message.content.toLowerCase();
     const prefix = prefixes.find((p) => messageContent.startsWith(p));
 
-    if (!prefix) return;
+    if (!prefix) {
+      return handleAIReply(message, client);
+    }
+
+    const userBlacklist = client.blacklists.get(message.author.id);
+    if (userBlacklist) {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription('You are blacklisted from using the bot.')
+            .setColor(Colors.hotPinkPop),
+        ],
+      }).then((msg) => {
+        setTimeout(() => {
+          msg.delete();
+        }, 10000);
+      })
+    }
 
     const args = message.content.slice(prefix.length).trim().split(/\s+/);
     const commandName = args.shift()?.toLowerCase();
@@ -130,21 +165,27 @@ export default {
       );
     }
 
-
-
     if (!currentCommand.execute) {
       const helpEmbed = new EmbedBuilder()
         .setTitle(`Help: ${processedCommandPath.join(' ')}`)
         .setDescription(command.example)
         .addFields(
-          { name: 'Usage', value: `${prefix}${processedCommandPath.join(' ')} [subcommand] [options]` },
-          { name: 'Subcommands', value: currentCommand.subs.length > 0 ? currentCommand.subs.map((sub: any) => sub.name).join(', ') : 'None' },
+          {
+            name: 'Usage',
+            value: `${prefix}${processedCommandPath.join(' ')} [subcommand] [options]`,
+          },
+          {
+            name: 'Subcommands',
+            value:
+              currentCommand.subs.length > 0
+                ? currentCommand.subs.map((sub: any) => sub.name).join(', ')
+                : 'None',
+          },
         )
         .setColor(Colors.hotPinkPop);
 
       return message.reply({ embeds: [helpEmbed] });
     }
-
 
     client.logs.info(
       `Command ${fullCommand} executed by ${message.author.tag} (${message.author.id}) on guild ${message.guild?.name} (${message.guild?.id})`,
@@ -175,3 +216,34 @@ export default {
     }
   },
 };
+
+async function handleAIReply(message: Message, client: Client, question?: string) {
+  if (message.reference && message.reference.messageId) {
+    const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
+    if (repliedMessage.author.bot && repliedMessage.author.id === client.user?.id) {
+      try {
+        if (!(message.channel instanceof TextChannel)) {
+          return;
+        }
+        await message.channel.sendTyping();
+        const answer = await getAIResponse(message, client, question || message.content);
+        return message.reply(answer);
+      } catch (error) {
+        return message.reply(error as any);
+      }
+    }
+  }
+
+  if (question) {
+    try {
+      if (!(message.channel instanceof TextChannel)) {
+        return;
+      }
+      await message.channel.sendTyping();
+      const answer = await getAIResponse(message, client, question);
+      return message.reply(answer);
+    } catch (error) {
+      return message.reply(error as any);
+    }
+  }
+}

@@ -43,15 +43,15 @@ class Logger {
     const now = new Date();
     const timestamp = `[${now.toLocaleDateString('en-GB')} ${now.toLocaleTimeString('en-GB')}]`;
 
-    const maxLevelLength = Math.max(...Object.values(LogLevel).map(l => l.length));
+    const maxLevelLength = Math.max(
+      ...Object.values(LogLevel).map((l) => l.length),
+    );
     const levelText = `[${level.toUpperCase()}]`.padEnd(maxLevelLength + 2);
     const coloredLevel = this.getLevelColor(level)(levelText);
 
     const contextText = context ? `[${context}] ` : '';
     return `${chalk.gray(timestamp)} ${coloredLevel} ${chalk.cyan(contextText)}`;
   }
-
-
 
   private logMessage(level: LogLevel, ...args: any[]) {
     const prefix = this.formatMessage(level, this.context);
@@ -84,8 +84,6 @@ class Logger {
     if (this.debugOption) this.logMessage(LogLevel.DEBUG, ...args);
   }
 
-
-
   info(...args: any[]) {
     this.logMessage(LogLevel.INFO, ...args);
   }
@@ -105,7 +103,6 @@ class Logger {
   static debug(...args: any[]) {
     this.getInstance().debug(...args);
   }
-
 
   static info(...args: any[]) {
     this.getInstance().info(...args);

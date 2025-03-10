@@ -10,7 +10,7 @@ class Client extends DiscordClient {
   public prefixes: Collection<string, string>;
   public devId: string = '1041378399005978624';
   public cooldowns: Collection<string, number>;
-
+  public blacklists: Collection<string, Date>;
   constructor(options: ClientOptions) {
     super(options);
     this.logs = new Logger({
@@ -20,6 +20,7 @@ class Client extends DiscordClient {
     this.events = new Collection();
     this.prefixes = new Collection();
     this.cooldowns = new Collection();
+    this.blacklists = new Collection();
   }
 
   async loadCommands(commandsPath?: string) {

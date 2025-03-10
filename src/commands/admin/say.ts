@@ -13,7 +13,9 @@ export default new Command({
     if (!args.length) {
       return message.channel.send('Please provide a message for me to say!');
     }
-
+    if (message.deletable) {
+      await message.delete();
+    }
     const textToSay = args.join(' ');
 
     message.channel.send(textToSay);

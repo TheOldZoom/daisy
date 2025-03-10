@@ -1,9 +1,16 @@
+process.stdout.write('\x1Bc');
+
 import 'dotenv/config';
-import { GatewayIntentBits } from 'discord.js';
+import { GatewayIntentBits, DefaultWebSocketManagerOptions } from 'discord.js';
+import figlet from 'figlet';
 import express, { NextFunction, Request, Response } from 'express';
 import Client from './struct/Client';
+import { analyzeCodeStats } from './utils/readFiles';
+import chalk from 'chalk';
+
 
 async function startBot() {
+  console.log(chalk.blue(await figletPromise('DAISY')))
   const token =
     process.env.NODE_ENV === 'development'
       ? process.env.DEV_TOKEN
@@ -11,6 +18,9 @@ async function startBot() {
   const port =
     process.env.NODE_ENV === 'development' ? 3001 : process.env.PORT || 3000;
   const app = express();
+  const { identifyProperties } = DefaultWebSocketManagerOptions;
+  //@ts-ignore
+  identifyProperties.browser = 'Discord Android';
 
   const client = new Client({
     intents: [
@@ -24,6 +34,15 @@ async function startBot() {
       repliedUser: true,
     },
   });
+  console.log(chalk.blue("-".repeat(75)))
+  const projectDetails = await analyzeCodeStats(process.cwd());
+  client.logs.info(`Total Files: ${projectDetails.totalFiles}`);
+  client.logs.info(`Total Lines: ${projectDetails.totalLines}`);
+  client.logs.info(`Total Characters: ${projectDetails.totalChars}`);
+  client.logs.info(`Average Lines per File: ${projectDetails.averageLines}`);
+  client.logs.info(`Average Characters per File: ${projectDetails.averageChars}`);
+
+  console.log(chalk.blue("-".repeat(75)))
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (
@@ -68,3 +87,15 @@ async function startBot() {
 }
 
 startBot();
+
+function figletPromise(text: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    figlet(text, (err, data) => {
+      if (err) {
+        reject('Something went wrong...');
+      } else {
+        resolve(data as string);
+      }
+    });
+  });
+}

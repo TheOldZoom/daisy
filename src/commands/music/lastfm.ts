@@ -13,7 +13,7 @@ const FM_API_URL = 'http://ws.audioscrobbler.com/2.0/';
 export default new Command({
   name: 'lastfm',
   description: 'Replies with latest Last.fm scrobble',
-  execute: async (message, args: string[], client: Client): Promise<void> => {
+  execute: async (message, args, client): Promise<void> => {
     const targetId = args[0] ? getUserId(args[0]) : message.author.id;
     if (!targetId) {
       const embed = new EmbedBuilder()
@@ -99,9 +99,7 @@ export default new Command({
         },
       );
       iconurl =
-        largestImage['#text'] || message.author.avatarURL() || undefined;
-    } else {
-      iconurl = message.author.avatarURL() || undefined;
+        largestImage['#text'] || latestTrack.album?.image?.[0]['#text'] || undefined;
     }
 
     let userIconUrl: string | undefined = undefined;
@@ -115,18 +113,17 @@ export default new Command({
         },
       );
       userIconUrl =
-        largestImage['#text'] || message.author.avatarURL() || undefined;
+        largestImage['#text'] || userForced.avatarURL() || undefined;
     }
-
     const embed = new EmbedBuilder()
       .setColor(Colors.sunshineYellow)
       .setAuthor({
-        name: `${nowPlaying ? 'Now Playing' : 'Last Played Track'} - ${message.author.displayName}`,
+        name: `${nowPlaying ? 'Now Playing' : 'Last Played Track'} - ${userForced.displayName}`,
         iconURL: userIconUrl,
         url: userInfo?.user?.url,
       })
       .setDescription(
-        `### [${trackName}](${latestTrack.url})\n\n**${artistName} ·** ${latestTrack.album['#text']}`,
+        `### [${trackName}](${latestTrack.url})\n\n**${artistName} ·** ${latestTrack.album['#text'] || "No album"}`
       )
       .setFooter({
         text: `Track Scrobbles: ${commas(trackPlayCount)} · Total Scrobbles: ${commas(totalScrobbles)}`,
@@ -141,9 +138,9 @@ export default new Command({
       name: 'set',
       description: 'Set your Last.fm username',
       async execute(
-        message: Message,
-        args: string[],
-        client: Client,
+        message,
+        args,
+        client,
       ): Promise<void> {
         const username = args[0];
         if (!username) {
@@ -193,9 +190,9 @@ export default new Command({
       name: 'remove',
       description: 'Remove your Last.fm username',
       async execute(
-        message: Message,
-        args: string[],
-        client: Client,
+        message,
+        args,
+        client,
       ): Promise<void> {
         await prisma.user.update({
           where: { id: message.author.id },
