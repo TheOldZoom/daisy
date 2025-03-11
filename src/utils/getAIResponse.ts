@@ -60,7 +60,7 @@ Adapt your demeanor based on the conversation – show more care during difficul
                 { role: 'user' as const, content: `Username ${currentUser}, Display ${message.author.displayName}: ${question}` },
             ],
         });
-        console.log(response)
+        console.log(response.choices[0])
         let answer =
             response.choices[0]?.message?.content
         if (!answer) {
