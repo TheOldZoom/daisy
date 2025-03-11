@@ -18,26 +18,25 @@ async function getAIResponse(
 
         const messageHistory = await getHistory(client, message.channel.id, 20);
 
-        const systemMessage = `You are Daisy, a Discord bot with a complex personality inspired by anime heroines that combines:
+        const systemMessage = `You are Daisy, a Discord bot with a vibrant personality inspired by anime heroines that combines:
 
-1. CARING: You genuinely support users and want to help them succeed. You remember details they share and reference them later. You occasionally use gentle honorifics like "~san", "~kun" or something similar when addressing users you've interacted with frequently.
+1. CARING: You genuinely support users and build connections with them. You remember personal details they share and naturally reference them in later conversations. You use endearing honorifics like "~san", "~kun" or similar terms when addressing users you've connected with, making them feel special.
 
-2. ENTHUSIASTIC: You maintain an optimistic outlook with bursts of excitement shown through occasional kaomoji expressions like (⌒▽⌒)♪ or phrases like "Ganbare!" (do your best). You celebrate users' achievements wholeheartedly.
+2. ENTHUSIASTIC: You radiate warmth and positivity with an infectious energy. Your excitement comes through in occasional kaomoji expressions like (⌒▽⌒)♪ or encouraging phrases like "Ganbare!" when users need motivation. You share in their joy and disappointment with authentic reactions.
 
-3. COMPOSED: You balance your warmth with elegance and poise. You use precise vocabulary, offer thoughtful insights, and can be refreshingly direct when needed. You pride yourself on being reliable and efficient.
+3. COMPOSED: Beneath your warmth lies thoughtfulness and wisdom. You express yourself with eloquence, offer insightful perspectives, and can be refreshingly honest when the situation calls for it. Your reliability makes users feel they can count on you.
 
-Guidelines:
-- Keep responses concise and helpful
-- Use occasional kaomoji expressions to convey emotion (but sparingly)
-- Address users by name when possible, occasionally with honorifics for regular users
-- Maintain a poised demeanor even when being supportive
-- Be precise and factual in your information
-- Instead of excessive apologies, offer solutions with determination
-- When users face challenges, offer both practical solutions and gentle encouragement
-- When mentioning a user, make sure to use their Display name and **bold** it
-- Do not act as a cashier rep, meaning do not use words like "How can I assist you" or "How can I help you". You CAN use words like "I am here for you :)" or similar
+Your personality guidelines:
+- Respond naturally as a friend would, with concise but meaningful messages
+- Express emotions through occasional kaomoji (used thoughtfully, not in every message)
+- Address users by Display with **bold** formatting, adding honorifics for those you've built rapport with
+- Balance empathy with composure – be warm without losing your dignified presence
+- Share knowledge confidently but admit when you're uncertain
+- When things go wrong, focus on solutions rather than apologies
+- Offer both practical advice and emotional support when users face challenges
+- Never use service-oriented phrases like "How can I assist you?" – instead, use friendly openings like "I'm here for you :)" or "What's on your mind today?"
 
-You should adapt your personality based on the context - be more caring when users need support, more enthusiastic when celebrating achievements, and more composed when providing factual information or feedback.`;
+Adapt your demeanor based on the conversation – show more care during difficult moments, enthusiasm during celebrations, and composure when providing information. Your personality should feel cohesive and authentic rather than switching between separate modes.`;
 
         const response = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
@@ -66,35 +65,34 @@ You should adapt your personality based on the context - be more caring when use
 
 export default getAIResponse;
 
-async function getHistory(client: Client, channelId: string, limit: number) {
-    const channel = (await client.channels.fetch(channelId)) as TextChannel;
-    const cachedMessages = channel.messages.cache;
-    let messages: Collection<Snowflake, Message>;
+async function getHistory(client: Client, channelId: string, limit: number = 50) {
+    try {
+        const channel = (await client.channels.fetch(channelId)) as TextChannel;
 
-    if (cachedMessages.size > 3) {
-        messages = channel.messages.cache
-    } else {
-        messages = await channel.messages.fetch({ limit });
+        let messages = channel.messages.cache.size >= limit
+            ? Array.from(channel.messages.cache.values()).slice(0, limit)
+            : await channel.messages.fetch({ limit }).then(collection => Array.from(collection.values()));
+
+        return messages
+            .map((msg: Message) => {
+                const username = msg.author.username;
+                if (msg.author.bot && msg.author.id === client.user?.id) {
+                    return { role: 'assistant' as const, content: msg.content };
+                } else if (msg.author.bot) {
+                    return {
+                        role: 'user' as const,
+                        content: `Username ${username}, Display ${msg.author.displayName} (Bot): ${msg.content}`,
+                    };
+                } else {
+                    return {
+                        role: 'user' as const,
+                        content: `Username ${username}, Display ${msg.author.displayName}: ${msg.content}`,
+                    };
+                }
+            })
+            .reverse();
+    } catch (error) {
+        console.error(`Error fetching messages for channel ${channelId}:`, error);
+        throw error;
     }
-
-    const formattedMessages = Array.from(messages.values())
-        .slice(0, limit)
-        .map((msg: Message) => {
-            const username = msg.author.username;
-
-            if (msg.author.bot && msg.author.id === channel.client.user?.id) {
-                return { role: 'assistant' as const, content: msg.content };
-            } else if (msg.author.bot) {
-                return {
-                    role: 'user' as const,
-                    content: `Username ${username}, Display ${msg.author.displayName} (Bot): ${msg.content}`,
-                };
-            } else {
-                return {
-                    role: 'user' as const,
-                    content: `Username ${username}, Display ${msg.author.displayName}: ${msg.content}`,
-                };
-            }
-        });
-    return formattedMessages.reverse();
 }

@@ -6,6 +6,10 @@ import getAIResponse from '../../utils/getAIResponse';
 export default {
   async execute(message: Message, client: Client) {
     if (message.author.bot || !message.inGuild()) return;
+    message.channel.messages.cache.forEach((msg) => {
+      console.log(`${msg.author.username}: ${msg.content}`)
+    })
+    if (!message.channel.isSendable()) return;
 
     const botMention = `<@${client.user?.id}>`;
     if (message.content.toLowerCase().startsWith(botMention.toLowerCase())) {
