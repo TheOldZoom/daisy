@@ -6,9 +6,6 @@ import getAIResponse from '../../utils/getAIResponse';
 export default {
   async execute(message: Message, client: Client) {
     if (message.author.bot || !message.inGuild()) return;
-    message.channel.messages.cache.forEach((msg) => {
-      console.log(`${msg.author.username}: ${msg.content}`)
-    })
     if (!message.channel.isSendable()) return;
 
     const botMention = `<@${client.user?.id}>`;
@@ -229,6 +226,8 @@ async function handleAIReply(message: Message, client: Client, question?: string
         if (!(message.channel instanceof TextChannel)) {
           return;
         }
+        client.logs.info(`${message.author.username} (${message.author.id}) requested: "${question || message.content}"`);
+
         await message.channel.sendTyping();
         const answer = await getAIResponse(message, client, question || message.content);
         return message.reply(answer);
@@ -243,6 +242,8 @@ async function handleAIReply(message: Message, client: Client, question?: string
       if (!(message.channel instanceof TextChannel)) {
         return;
       }
+      client.logs.info(`${message.author.username} (${message.author.id}) requested: "${question || message.content}"`);
+
       await message.channel.sendTyping();
       const answer = await getAIResponse(message, client, question);
       return message.reply(answer);
