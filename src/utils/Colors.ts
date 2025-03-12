@@ -1,16 +1,16 @@
-import { ColorResolvable } from 'discord.js';
+import { ColorResolvable } from 'discord.js'
 
 interface Colors {
-  sweetPink: ColorResolvable;
-  sakuraBlush: ColorResolvable;
-  sunshineYellow: ColorResolvable;
-  dreamyLavender: ColorResolvable;
-  boldCoral: ColorResolvable;
-  skyHighBlue: ColorResolvable;
-  mintyFresh: ColorResolvable;
-  pureWhite: ColorResolvable;
-  hotPinkPop: ColorResolvable;
-  denimChic: ColorResolvable;
+  sweetPink: ColorResolvable
+  sakuraBlush: ColorResolvable
+  sunshineYellow: ColorResolvable
+  dreamyLavender: ColorResolvable
+  boldCoral: ColorResolvable
+  skyHighBlue: ColorResolvable
+  mintyFresh: ColorResolvable
+  pureWhite: ColorResolvable
+  hotPinkPop: ColorResolvable
+  denimChic: ColorResolvable
 }
 
 const Colors: Colors = {
@@ -24,13 +24,13 @@ const Colors: Colors = {
   pureWhite: '#F9F9F9',
   hotPinkPop: '#F50057',
   denimChic: '#3E4A89',
-};
-
-function getRandomColor(): ColorResolvable {
-  const colorKeys = Object.keys(Colors);
-  const randomKey = colorKeys[Math.floor(Math.random() * colorKeys.length)];
-  return Colors[randomKey as keyof Colors];
 }
 
-export default Colors;
-export { getRandomColor };
+function getRandomColor(): ColorResolvable {
+  const colorKeys = Object.keys(Colors)
+  const randomKey = colorKeys[Math.floor(Math.random() * colorKeys.length)]
+  return Colors[randomKey as keyof Colors]
+}
+
+export default Colors
+export { getRandomColor }

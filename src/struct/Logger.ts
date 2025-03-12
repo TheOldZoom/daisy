@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk from 'chalk'
 
 enum LogLevel {
   LOG = 'log',
@@ -9,23 +9,23 @@ enum LogLevel {
 }
 
 interface LoggerOptions {
-  context?: string;
-  debug?: boolean;
+  context?: string
+  debug?: boolean
 }
 
 class Logger {
-  private static instance: Logger;
-  public debugOption?: boolean;
-  private context?: string;
+  private static instance: Logger
+  public debugOption?: boolean
+  private context?: string
 
   constructor(options: LoggerOptions = {}) {
-    this.debugOption = options.debug || false;
-    this.context = options.context;
+    this.debugOption = options.debug || false
+    this.context = options.context
   }
 
   static getInstance(options: LoggerOptions = {}): Logger {
-    if (!this.instance) this.instance = new Logger(options);
-    return this.instance;
+    if (!this.instance) this.instance = new Logger(options)
+    return this.instance
   }
 
   private getLevelColor(level: LogLevel) {
@@ -35,78 +35,78 @@ class Logger {
       [LogLevel.LOG]: chalk.green,
       [LogLevel.DEBUG]: chalk.magenta,
       [LogLevel.INFO]: chalk.blueBright,
-    };
-    return colorMap[level] || chalk.white;
+    }
+    return colorMap[level] || chalk.white
   }
 
   private formatMessage(level: LogLevel, context?: string): string {
-    const now = new Date();
-    const timestamp = `[${now.toLocaleDateString('en-GB')} ${now.toLocaleTimeString('en-GB')}]`;
+    const now = new Date()
+    const timestamp = `[${now.toLocaleDateString('en-GB')} ${now.toLocaleTimeString('en-GB')}]`
 
     const maxLevelLength = Math.max(
-      ...Object.values(LogLevel).map((l) => l.length),
-    );
-    const levelText = `[${level.toUpperCase()}]`.padEnd(maxLevelLength + 2);
-    const coloredLevel = this.getLevelColor(level)(levelText);
+      ...Object.values(LogLevel).map((l) => l.length)
+    )
+    const levelText = `[${level.toUpperCase()}]`.padEnd(maxLevelLength + 2)
+    const coloredLevel = this.getLevelColor(level)(levelText)
 
-    const contextText = context ? `[${context}] ` : '';
-    return `${chalk.gray(timestamp)} ${coloredLevel} ${chalk.cyan(contextText)}`;
+    const contextText = context ? `[${context}] ` : ''
+    return `${chalk.gray(timestamp)} ${coloredLevel} ${chalk.cyan(contextText)}`
   }
 
   private logMessage(level: LogLevel, ...args: any[]) {
-    const prefix = this.formatMessage(level, this.context);
+    const prefix = this.formatMessage(level, this.context)
 
     if (args.length === 1 && Array.isArray(args[0])) {
-      console.log(prefix);
-      console.table(args[0]);
+      console.log(prefix)
+      console.table(args[0])
     } else {
-      console.log(prefix, ...args);
+      console.log(prefix, ...args)
     }
   }
 
   setDebug(debug: boolean) {
-    this.debugOption = debug;
+    this.debugOption = debug
   }
 
   error(...args: any[]) {
-    this.logMessage(LogLevel.ERROR, ...args);
+    this.logMessage(LogLevel.ERROR, ...args)
   }
 
   warn(...args: any[]) {
-    this.logMessage(LogLevel.WARN, ...args);
+    this.logMessage(LogLevel.WARN, ...args)
   }
 
   log(...args: any[]) {
-    this.logMessage(LogLevel.LOG, ...args);
+    this.logMessage(LogLevel.LOG, ...args)
   }
 
   debug(...args: any[]) {
-    if (this.debugOption) this.logMessage(LogLevel.DEBUG, ...args);
+    if (this.debugOption) this.logMessage(LogLevel.DEBUG, ...args)
   }
 
   info(...args: any[]) {
-    this.logMessage(LogLevel.INFO, ...args);
+    this.logMessage(LogLevel.INFO, ...args)
   }
 
   static error(...args: any[]) {
-    this.getInstance().error(...args);
+    this.getInstance().error(...args)
   }
 
   static warn(...args: any[]) {
-    this.getInstance().warn(...args);
+    this.getInstance().warn(...args)
   }
 
   static log(...args: any[]) {
-    this.getInstance().log(...args);
+    this.getInstance().log(...args)
   }
 
   static debug(...args: any[]) {
-    this.getInstance().debug(...args);
+    this.getInstance().debug(...args)
   }
 
   static info(...args: any[]) {
-    this.getInstance().info(...args);
+    this.getInstance().info(...args)
   }
 }
 
-export { Logger, LogLevel };
+export { Logger, LogLevel }
