@@ -42,6 +42,9 @@ async function startBot() {
   client.logs.info(
     `Average Characters per File: ${projectDetails.averageChars}`
   )
+  client.logs.info(
+    `Largest file: ${projectDetails.largestFile?.path} with ${projectDetails.largestFile?.lines} lines`
+  )
 
   console.log(chalk.blue('-'.repeat(75)))
 

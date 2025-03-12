@@ -26,9 +26,9 @@ export async function analyzeCodeStats(dirPath: string): Promise<CodeStats> {
     largestFile: null,
   }
 
-  const excludeDirs = ['node_modules', '.git']
+  const excludePaths = ['node_modules', '.git', 'package-lock.json']
 
-  await processDirectory(dirPath, stats, excludeDirs)
+  await processDirectory(dirPath, stats, excludePaths)
 
   if (stats.totalFiles > 0) {
     stats.averageLines =
@@ -43,7 +43,7 @@ export async function analyzeCodeStats(dirPath: string): Promise<CodeStats> {
 async function processDirectory(
   dirPath: string,
   stats: CodeStats,
-  excludeDirs: string[]
+  excludePaths: string[]
 ): Promise<void> {
   try {
     const entries = await fs.promises.readdir(dirPath, { withFileTypes: true })
@@ -51,12 +51,12 @@ async function processDirectory(
     for (const entry of entries) {
       const fullPath = path.join(dirPath, entry.name)
 
-      if (entry.isDirectory()) {
-        if (excludeDirs.includes(entry.name)) {
-          continue
-        }
+      if (excludePaths.includes(entry.name)) {
+        continue
+      }
 
-        await processDirectory(fullPath, stats, excludeDirs)
+      if (entry.isDirectory()) {
+        await processDirectory(fullPath, stats, excludePaths)
       } else if (entry.isFile()) {
         await processFile(fullPath, stats)
       }
