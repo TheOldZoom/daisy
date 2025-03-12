@@ -1,6 +1,6 @@
 import { EmbedBuilder, Message } from 'discord.js';
 import Command from '../../struct/Command';
-import prisma from '../../struct/prisma';
+import prisma from '../../struct/Prisma';
 import Colors from '../../utils/Colors';
 import { getUserId } from '../../utils/getUserId';
 

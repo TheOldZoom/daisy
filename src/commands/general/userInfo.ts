@@ -2,7 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import Command from '../../struct/Command';
 import { getUserId } from '../../utils/getUserId';
 import Colors from '../../utils/Colors';
-import prisma from '../../struct/prisma';
+import prisma from '../../struct/Prisma';
 
 export default new Command({
     name: 'userinfo',

@@ -1,5 +1,5 @@
 import Command from '../../struct/Command';
-import prisma from '../../struct/prisma';
+import prisma from '../../struct/Prisma';
 import { getUserId } from '../../utils/getUserId';
 import { Message, EmbedBuilder, TextChannel } from 'discord.js';
 import Client from '../../struct/Client';

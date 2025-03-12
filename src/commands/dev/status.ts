@@ -1,7 +1,7 @@
 import { EmbedBuilder, Message, ActivityType } from 'discord.js';
 import Client from '../../struct/Client';
 import Command from '../../struct/Command';
-import prisma from '../../struct/prisma';
+import prisma from '../../struct/Prisma';
 import Colors from '../../utils/Colors';
 import { processStatus } from '../../events/ready';
 

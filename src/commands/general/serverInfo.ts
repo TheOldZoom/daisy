@@ -1,7 +1,7 @@
 import { EmbedBuilder, ChannelType, GuildVerificationLevel, GuildExplicitContentFilter, GuildNSFWLevel } from 'discord.js';
 import Command from '../../struct/Command';
 import Colors from '../../utils/Colors';
-import prisma from '../../struct/prisma';
+import prisma from '../../struct/Prisma';
 import commas from '../../utils/commas';
 
 export default new Command({

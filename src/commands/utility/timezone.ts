@@ -1,7 +1,7 @@
 import { Message, Client, EmbedBuilder } from 'discord.js';
 import { getUserId } from '../../utils/getUserId';
 import Command from '../../struct/Command';
-import prisma from '../../struct/prisma';
+import prisma from '../../struct/Prisma';
 import moment from 'moment-timezone';
 import Colors from '../../utils/Colors';
 

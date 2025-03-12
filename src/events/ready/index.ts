@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import Client from '../../struct/Client';
-import prisma from '../../struct/prisma';
+import prisma from '../../struct/Prisma';
 import { guild, user } from '@prisma/client';
 import { ActivityType } from 'discord.js';
 
