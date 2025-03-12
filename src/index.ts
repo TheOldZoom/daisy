@@ -7,6 +7,7 @@ import express, { NextFunction, Request, Response } from 'express'
 import Client from './struct/Client'
 import { analyzeCodeStats } from './utils/readFiles'
 import chalk from 'chalk'
+import commas from './utils/commas'
 
 async function startBot() {
   console.log(chalk.blue(await figletPromise('DAISY')))
@@ -35,15 +36,15 @@ async function startBot() {
   })
   console.log(chalk.blue('-'.repeat(75)))
   const projectDetails = await analyzeCodeStats(process.cwd())
-  client.logs.info(`Total Files: ${projectDetails.totalFiles}`)
-  client.logs.info(`Total Lines: ${projectDetails.totalLines}`)
-  client.logs.info(`Total Characters: ${projectDetails.totalChars}`)
+  client.logs.info(`Total Files: ${commas(projectDetails.totalFiles)}`)
+  client.logs.info(`Total Lines: ${commas(projectDetails.totalLines)}`)
+  client.logs.info(`Total Characters: ${commas(projectDetails.totalChars)}`)
   client.logs.info(`Average Lines per File: ${projectDetails.averageLines}`)
   client.logs.info(
     `Average Characters per File: ${projectDetails.averageChars}`
   )
   client.logs.info(
-    `Largest file: ${projectDetails.largestFile?.path} with ${projectDetails.largestFile?.lines} lines`
+    `Largest file: ${projectDetails.largestFile?.path} with ${commas(projectDetails.largestFile?.lines || 0)} lines`
   )
 
   console.log(chalk.blue('-'.repeat(75)))
