@@ -1,10 +1,4 @@
-import {
-  Collection,
-  EmbedBuilder,
-  Message,
-  Snowflake,
-  TextChannel,
-} from 'discord.js'
+import { EmbedBuilder, Message, TextChannel } from 'discord.js'
 import groq from '../struct/Groq'
 import Client from '../struct/Client'
 import Colors from './Colors'
