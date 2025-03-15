@@ -24,7 +24,7 @@ export default new Command({
         const userId = await getUserId(args[0], message.guild);
 
         if (!userId) {
-          embed.setDescription("Please provide a user ID.");
+          embed.setDescription("Could not find this user");
           await message.reply({ embeds: [embed] });
           return;
         }

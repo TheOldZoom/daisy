@@ -17,10 +17,11 @@ export default new Command({
     const targetId = args[0]
       ? getUserId(args[0], message.guild)
       : message.author.id;
+
     if (!targetId) {
       const embed = new EmbedBuilder()
         .setColor(Colors.hotPinkPop)
-        .setDescription("Invalid user mention or ID.");
+        .setDescription("Couldn't find this user");
       await message.reply({ embeds: [embed] });
       return;
     }
