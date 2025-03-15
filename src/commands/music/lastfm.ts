@@ -14,7 +14,9 @@ export default new Command({
   name: "lastfm",
   description: "Replies with latest Last.fm scrobble",
   execute: async (message, args, client): Promise<void> => {
-    const targetId = args[0] ? getUserId(args[0]) : message.author.id;
+    const targetId = args[0]
+      ? getUserId(args[0], message.guild)
+      : message.author.id;
     if (!targetId) {
       const embed = new EmbedBuilder()
         .setColor(Colors.hotPinkPop)

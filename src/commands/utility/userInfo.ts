@@ -9,7 +9,9 @@ export default new Command({
   description: "Displays information about a user.",
   aliases: ["ui", "user", "u"],
   execute: async (message, args, client) => {
-    const target = args[0] ? getUserId(args[0]) : message.author.id;
+    const target = args[0]
+      ? getUserId(args[0], message.guild)
+      : message.author.id;
 
     if (!target) return;
 

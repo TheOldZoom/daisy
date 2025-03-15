@@ -21,7 +21,7 @@ export default new Command({
       execute: async (message, args, client): Promise<void> => {
         const embed = new EmbedBuilder().setColor(Colors.sunshineYellow);
 
-        const userId = await getUserId(args[0]);
+        const userId = await getUserId(args[0], message.guild);
 
         if (!userId) {
           embed.setDescription("Please provide a user ID.");

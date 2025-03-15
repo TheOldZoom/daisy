@@ -14,9 +14,19 @@ export default new Command({
   description: "Displays the avatar and banner of a user.",
   aliases: ["avba", "avb"],
   execute: async (message, args, client) => {
-    const target = args[0] ? getUserId(args[0]) : message.author.id;
+    const target = args[0]
+      ? getUserId(args[0], message.guild)
+      : message.author.id;
 
-    if (!target) return;
+    if (!target) {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(Colors.hotPinkPop)
+            .setDescription(`The user was not found`),
+        ],
+      });
+    }
 
     const user = await client.users
       .fetch(target, { force: true })

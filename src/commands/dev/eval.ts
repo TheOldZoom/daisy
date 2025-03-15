@@ -4,7 +4,7 @@ import { inspect } from "util";
 
 export default new Command({
   name: "eval",
-  description: "Evaluates TypeScript code. Developer only.",
+  description: "Evaluates JavaScript code. Developer only.",
   aliases: ["ev", "evaluate"],
   devOnly: true,
   async execute(message: Message, args: string[], client: any) {
@@ -16,7 +16,12 @@ export default new Command({
       return message.reply("This command can only be used in a text channel.");
     }
 
-    const code = args.join(" ");
+    let code = args.join(" ");
+
+    if (!code.trim().endsWith(";")) {
+      code += ";";
+    }
+
     let startTime = process.hrtime();
 
     try {
@@ -26,8 +31,9 @@ export default new Command({
         "args",
         `
         try {
-          const result = (async () => { ${code} })();
-          return result;
+          return (async () => { 
+            ${code} 
+          })();
         } catch (err) {
           throw err;
         }
@@ -35,6 +41,7 @@ export default new Command({
       );
 
       const result = await evaluatedCode(message, client, args);
+
       const execTime = process.hrtime(startTime);
       const execTimeMs = (execTime[0] * 1000 + execTime[1] / 1000000).toFixed(
         2
@@ -124,7 +131,6 @@ export default new Command({
           }
         }
 
-        // Send stack trace in chunks
         if (errorStack.length > 0) {
           const stackTraceEmbed = new EmbedBuilder()
             .setColor("#FF0000")

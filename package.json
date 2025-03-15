@@ -29,6 +29,7 @@
     "express": "^4.21.2",
     "figlet": "^1.8.0",
     "groq-sdk": "^0.15.0",
-    "moment-timezone": "^0.5.47"
+    "moment-timezone": "^0.5.47",
+    "vm2": "^3.9.19"
   }
 }

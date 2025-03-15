@@ -16,7 +16,7 @@ export default new Command({
 
     const embed = new EmbedBuilder().setColor(Colors.sunshineYellow);
 
-    const id = getUserId(args[0]);
+    const id = getUserId(args[0], message.guild);
 
     if (!id) {
       embed.setDescription("Please provide a valid member from this server.");
