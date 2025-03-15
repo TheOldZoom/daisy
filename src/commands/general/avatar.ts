@@ -4,47 +4,47 @@ import {
   ButtonStyle,
   EmbedBuilder,
   MessageActionRowComponentBuilder,
-} from 'discord.js'
-import Command from '../../struct/Command'
-import Colors from '../../utils/Colors'
-import { getUserId } from '../../utils/getUserId'
+} from "discord.js";
+import Command from "../../struct/Command";
+import Colors from "../../utils/Colors";
+import { getUserId } from "../../utils/getUserId";
 
 export default new Command({
-  name: 'avatar',
-  description: 'Displays the avatar of a user.',
-  aliases: ['av'],
+  name: "avatar",
+  description: "Displays the avatar of a user.",
+  aliases: ["av"],
   execute: async (message, args, client) => {
-    const target = args[0] ? getUserId(args[0]) : message.author.id
+    const target = args[0] ? getUserId(args[0]) : message.author.id;
 
-    if (!target) return
+    if (!target) return;
 
     const user = await client.users
       .fetch(target, { force: true })
-      .catch(() => null)
+      .catch(() => null);
 
     if (!user) {
       return message.reply({
         embeds: [
           new EmbedBuilder()
             .setColor(Colors.hotPinkPop)
-            .setDescription('User not found.'),
+            .setDescription("User not found."),
         ],
-      })
+      });
     }
-    const avatarURL = user.displayAvatarURL({ size: 1024 })
+    const avatarURL = user.displayAvatarURL({ size: 1024 });
 
     const embed = new EmbedBuilder()
       .setColor(Colors.sunshineYellow)
       .setTitle(`${user.username}'s Avatar`)
-      .setImage(avatarURL)
+      .setImage(avatarURL);
     const row =
       new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
         new ButtonBuilder()
-          .setLabel('Avatar URL')
+          .setLabel("Avatar URL")
           .setURL(avatarURL)
           .setDisabled(!avatarURL)
           .setStyle(ButtonStyle.Link)
-      )
-    await message.reply({ embeds: [embed], components: [row] })
+      );
+    await message.reply({ embeds: [embed], components: [row] });
   },
-})
+});

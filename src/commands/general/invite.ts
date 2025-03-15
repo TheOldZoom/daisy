@@ -4,13 +4,13 @@ import {
   ButtonStyle,
   EmbedBuilder,
   MessageActionRowComponentBuilder,
-} from 'discord.js'
-import Command from '../../struct/Command'
-import Colors from '../../utils/Colors'
+} from "discord.js";
+import Command from "../../struct/Command";
+import Colors from "../../utils/Colors";
 
 export default new Command({
-  name: 'invite',
-  description: 'Replies with the invite',
+  name: "invite",
+  description: "Replies with the invite",
   execute(message, args, client) {
     message.reply({
       embeds: [
@@ -28,6 +28,6 @@ export default new Command({
             )
         ),
       ],
-    })
+    });
   },
-})
+});

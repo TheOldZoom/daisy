@@ -1,19 +1,19 @@
-import Command from '../../struct/Command'
+import Command from "../../struct/Command";
 
 export default new Command({
-  name: 'ping',
-  description: 'Ping the bot and get a response.',
+  name: "ping",
+  description: "Ping the bot and get a response.",
   execute: async (message, args, client) => {
-    message.reply('Pong!')
+    message.reply("Pong!");
   },
   subs: [
     {
-      name: 'stats',
-      description: 'Get bot ping stats.',
+      name: "stats",
+      description: "Get bot ping stats.",
       execute: async (message, args, client) => {
-        const ping = Date.now() - message.createdTimestamp
-        message.reply(`Bot ping is ${ping}ms.`)
+        const ping = Date.now() - message.createdTimestamp;
+        message.reply(`Bot ping is ${ping}ms.`);
       },
     },
   ],
-})
+});

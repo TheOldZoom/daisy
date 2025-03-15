@@ -4,16 +4,16 @@ import {
   GuildVerificationLevel,
   GuildExplicitContentFilter,
   GuildNSFWLevel,
-} from 'discord.js'
-import Command from '../../struct/Command'
-import Colors from '../../utils/Colors'
-import prisma from '../../struct/Prisma'
-import commas from '../../utils/commas'
+} from "discord.js";
+import Command from "../../struct/Command";
+import Colors from "../../utils/Colors";
+import prisma from "../../struct/Prisma";
+import commas from "../../utils/commas";
 
 export default new Command({
-  name: 'serverinfo',
-  description: 'Displays detailed information about the current server.',
-  aliases: ['si', 'server', 'guild'],
+  name: "serverinfo",
+  description: "Displays detailed information about the current server.",
+  aliases: ["si", "server", "guild"],
   execute: async (message, args, client) => {
     try {
       if (!message.guild) {
@@ -21,13 +21,13 @@ export default new Command({
           embeds: [
             new EmbedBuilder()
               .setColor(Colors.hotPinkPop)
-              .setDescription('❌ This command can only be used in a server.'),
+              .setDescription("❌ This command can only be used in a server."),
           ],
-        })
+        });
       }
 
-      const guild = message.guild
-      await guild.fetch()
+      const guild = message.guild;
+      await guild.fetch();
 
       const serverDB = await prisma.guild
         .findUnique({
@@ -40,11 +40,11 @@ export default new Command({
             },
           },
         })
-        .catch(() => null)
+        .catch(() => null);
 
       const messageStats = await prisma.userMessages
         .groupBy({
-          by: ['guildId'],
+          by: ["guildId"],
           where: {
             guildId: guild.id,
           },
@@ -56,7 +56,7 @@ export default new Command({
             userId: true,
           },
         })
-        .catch(() => [])
+        .catch(() => []);
 
       const topUsers = await prisma.guildUserLevel
         .findMany({
@@ -64,19 +64,19 @@ export default new Command({
             guildId: guild.id,
           },
           orderBy: {
-            level: 'desc',
+            level: "desc",
           },
           take: 3,
           include: {
             user: true,
           },
         })
-        .catch(() => [])
+        .catch(() => []);
 
-      const owner = await guild.members.fetch(guild.ownerId).catch(() => null)
+      const owner = await guild.members.fetch(guild.ownerId).catch(() => null);
       const ownerTag = owner
         ? `${owner.user.username} (${guild.ownerId})`
-        : guild.ownerId
+        : guild.ownerId;
 
       const channelCounts = {
         text: guild.channels.cache.filter(
@@ -98,55 +98,55 @@ export default new Command({
           (c) => c.type === ChannelType.GuildStageVoice
         ).size,
         total: guild.channels.cache.size,
-      }
+      };
 
-      const totalMembers = guild.memberCount
-      const botCount = guild.members.cache.filter((m) => m.user.bot).size
+      const totalMembers = guild.memberCount;
+      const botCount = guild.members.cache.filter((m) => m.user.bot).size;
 
-      const createdAt = `<t:${Math.floor(guild.createdTimestamp / 1000)}:F>`
-      const createdAtRelative = `<t:${Math.floor(guild.createdTimestamp / 1000)}:R>`
+      const createdAt = `<t:${Math.floor(guild.createdTimestamp / 1000)}:F>`;
+      const createdAtRelative = `<t:${Math.floor(guild.createdTimestamp / 1000)}:R>`;
 
       const boostLevel = guild.premiumTier
         ? `Level ${guild.premiumTier}`
-        : 'Level 0'
-      const boostCount = guild.premiumSubscriptionCount || 0
+        : "Level 0";
+      const boostCount = guild.premiumSubscriptionCount || 0;
 
       const verificationLevels = {
-        [GuildVerificationLevel.None]: 'None',
-        [GuildVerificationLevel.Low]: 'Low',
-        [GuildVerificationLevel.Medium]: 'Medium',
-        [GuildVerificationLevel.High]: 'High',
-        [GuildVerificationLevel.VeryHigh]: 'Very High',
-      }
+        [GuildVerificationLevel.None]: "None",
+        [GuildVerificationLevel.Low]: "Low",
+        [GuildVerificationLevel.Medium]: "Medium",
+        [GuildVerificationLevel.High]: "High",
+        [GuildVerificationLevel.VeryHigh]: "Very High",
+      };
 
       const contentFilterLevels = {
-        [GuildExplicitContentFilter.Disabled]: 'Disabled',
+        [GuildExplicitContentFilter.Disabled]: "Disabled",
         [GuildExplicitContentFilter.MembersWithoutRoles]:
-          'Members Without Roles',
-        [GuildExplicitContentFilter.AllMembers]: 'All Members',
-      }
+          "Members Without Roles",
+        [GuildExplicitContentFilter.AllMembers]: "All Members",
+      };
 
       const nsfwLevels = {
-        [GuildNSFWLevel.Default]: 'Default',
-        [GuildNSFWLevel.Explicit]: 'Explicit',
-        [GuildNSFWLevel.Safe]: 'Safe',
-        [GuildNSFWLevel.AgeRestricted]: 'Age Restricted',
-      }
+        [GuildNSFWLevel.Default]: "Default",
+        [GuildNSFWLevel.Explicit]: "Explicit",
+        [GuildNSFWLevel.Safe]: "Safe",
+        [GuildNSFWLevel.AgeRestricted]: "Age Restricted",
+      };
 
-      const totalMessages = messageStats[0]?._sum.total || 0
-      const totalWords = messageStats[0]?._sum.wordCount || 0
-      const activeUsers = messageStats[0]?._count.userId || 0
+      const totalMessages = messageStats[0]?._sum.total || 0;
+      const totalWords = messageStats[0]?._sum.wordCount || 0;
+      const activeUsers = messageStats[0]?._count.userId || 0;
 
-      const customPrefix = serverDB?.prefix || client.prefix || '!'
+      const customPrefix = serverDB?.prefix || client.prefix || "!";
 
-      let topUsersString = 'None tracked yet'
+      let topUsersString = "None tracked yet";
       if (topUsers.length > 0) {
         topUsersString = topUsers
           .map(
             (userData, index) =>
-              `${index + 1}. ${userData.user.id ? `<@${userData.user.id}>` : 'Unknown'} (Level ${commas(userData.level)})`
+              `${index + 1}. ${userData.user.id ? `<@${userData.user.id}>` : "Unknown"} (Level ${commas(userData.level)})`
           )
-          .join('\n')
+          .join("\n");
       }
 
       const mainEmbed = new EmbedBuilder()
@@ -156,7 +156,7 @@ export default new Command({
         })
         .setColor(Colors.sunshineYellow)
         .setThumbnail(guild.iconURL({ size: 1024 }))
-        .setDescription(`**ID:** ${guild.id}\n${guild.description || ''}
+        .setDescription(`**ID:** ${guild.id}\n${guild.description || ""}
 
 **👑 Owner**
 ${ownerTag}
@@ -195,10 +195,10 @@ Active Users: ${commas(activeUsers)}
 Tracked Levels: ${commas(activeUsers)}
 
 **🏆 Top Users by Level**
-${topUsersString}`)
+${topUsersString}`);
 
       if (guild.bannerURL()) {
-        mainEmbed.setImage(guild.bannerURL({ size: 4096 }))
+        mainEmbed.setImage(guild.bannerURL({ size: 4096 }));
       }
 
       if (guild.features.length > 0) {
@@ -208,26 +208,26 @@ ${topUsersString}`)
               .map(
                 (f) =>
                   `\`${f
-                    .replace(/_/g, ' ')
+                    .replace(/_/g, " ")
                     .toLowerCase()
                     .replace(/\b\w/g, (l) => l.toUpperCase())}\``
               )
-              .join(', ')}`
-        )
+              .join(", ")}`
+        );
       }
 
-      await message.reply({ embeds: [mainEmbed] })
+      await message.reply({ embeds: [mainEmbed] });
     } catch (error) {
-      console.error('Error in serverinfo command:', error)
+      console.error("Error in serverinfo command:", error);
       await message.reply({
         embeds: [
           new EmbedBuilder()
             .setColor(Colors.hotPinkPop)
             .setDescription(
-              '❌ An error occurred while fetching server information.'
+              "❌ An error occurred while fetching server information."
             ),
         ],
-      })
+      });
     }
   },
-})
+});
