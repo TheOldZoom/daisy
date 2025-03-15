@@ -252,6 +252,7 @@ async function handleAIReply(
           client,
           question || message.content
         )
+        if (!answer) return
         return message.reply(answer)
       } catch (error) {
         return message.reply(error as any)
@@ -270,6 +271,8 @@ async function handleAIReply(
 
       await message.channel.sendTyping()
       const answer = await getAIResponse(message, client, question)
+      if (!answer) return
+
       return message.reply(answer)
     } catch (error) {
       return message.reply(error as any)

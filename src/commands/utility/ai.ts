@@ -19,6 +19,8 @@ export default new Command({
 
     try {
       const answer = await getAIResponse(message, client, question)
+      if (!answer) return
+
       return message.reply(answer)
     } catch (error: any) {
       return message.reply(error)
