@@ -82,6 +82,7 @@ async function startBot() {
       channels: client.channels.cache.size,
       commands: client.commands.size,
       events: client.events.size,
+      epm: client.eventPerMinutes(),
     });
   });
 
