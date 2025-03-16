@@ -62,7 +62,7 @@ model guildUserLevel {
 
 model guild {
   id               String    @id
-  name             String
+  name             String?
   prefix           String?
   blacklistedSince DateTime?
   createdAt        DateTime  @default(now())

@@ -52,7 +52,6 @@ export default new Command({
           await message.reply({ embeds: [embed] });
           return;
         }
-
         await prisma.guild.upsert({
           where: { id },
           update: { prefix },

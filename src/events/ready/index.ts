@@ -43,10 +43,8 @@ async function loadGuilds(client: Client, storedGuilds: guild[]) {
   const storedGuildIDs = new Set(storedGuilds.map((g) => g.id));
   const clientGuilds = client.guilds.cache;
 
-  // Add or update guilds from Discord
   for (const [id, guild] of clientGuilds) {
     if (!storedGuildIDs.has(id)) {
-      // Add new guild
       client.logs.info(`Adding missing guild ${id} to the database.`);
       await prisma.guild.create({
         data: {
