@@ -26,30 +26,31 @@ export default async (client: Client, target: string) => {
   ]);
 
   const displayName = user.globalName ?? user.username;
-  const lastFmUser = userDB?.fmUser ?? "Not set";
-  const timezone = userDB?.timezone ?? "Not set";
-  const birthday = userDB?.birthday ?? "Not set";
+  const lastFmUser = userDB?.fmUser;
+  const timezone = userDB?.timezone;
+  const birthday = userDB?.birthday;
   const createdAt = `<t:${Math.floor(user.createdTimestamp / 1000)}:R>`;
 
   const bannerURL = userProfile?.bannerURL({ size: 4096 }) || null;
   const avatarURL = user.displayAvatarURL({ size: 1024 });
 
   const embedColor = Colors.sunshineYellow;
+
+  const descriptionFields = [
+    `**Display Name:** ${displayName}`,
+    lastFmUser && `**Last.fm:** ${lastFmUser}`,
+    timezone && `**Timezone:** ${timezone}`,
+    birthday && `**Birthday:** ${birthday}`,
+    `**Account Created:** ${createdAt}`,
+  ].filter(Boolean);
+
   const embed = new EmbedBuilder()
     .setAuthor({
       name: `${user.username} (${user.id})`,
       iconURL: avatarURL,
     })
     .setColor(embedColor)
-    .setDescription(
-      `
-            **Display Name:** ${displayName}
-            **Last.fm:** ${lastFmUser}
-            **Timezone:** ${timezone}
-            **Birthday:** ${birthday}
-            **Account Created:** ${createdAt}
-            `
-    )
+    .setDescription(descriptionFields.join("\n"))
     .setThumbnail(avatarURL);
 
   if (bannerURL) {

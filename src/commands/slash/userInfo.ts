@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Slash from "../../struct/Slash";
-import userInfo from "../../tempCommands/userInfo";
+import userInfo from "../../inters/userInfo";
 import Colors from "../../utils/Colors";
 
 export default new Slash({

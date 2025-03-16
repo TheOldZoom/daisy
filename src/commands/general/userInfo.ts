@@ -3,7 +3,7 @@ import Command from "../../struct/Command";
 import { getUserId } from "../../utils/getUserId";
 import Colors from "../../utils/Colors";
 import prisma from "../../struct/Prisma";
-import userInfo from "../../tempCommands/userInfo";
+import userInfo from "../../inters/userInfo";
 
 export default new Command({
   name: "userinfo",

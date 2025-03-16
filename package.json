@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "type": "commonjs",
+  "prisma": {
+    "schema": "src/prisma/schema.prisma"
+  },
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/figlet": "^1.7.0",
