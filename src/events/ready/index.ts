@@ -42,8 +42,11 @@ async function loadUsers(client: Client, users: user[]) {
 async function loadGuilds(client: Client, storedGuilds: guild[]) {
   const storedGuildIDs = new Set(storedGuilds.map((g) => g.id));
   const clientGuilds = client.guilds.cache;
+
+  // Add or update guilds from Discord
   for (const [id, guild] of clientGuilds) {
     if (!storedGuildIDs.has(id)) {
+      // Add new guild
       client.logs.info(`Adding missing guild ${id} to the database.`);
       await prisma.guild.create({
         data: {
@@ -51,22 +54,52 @@ async function loadGuilds(client: Client, storedGuilds: guild[]) {
           name: guild.name,
           prefix: null,
           blacklistedSince: null,
+          icon: guild.icon,
+          ownerId: guild.ownerId,
+          systemChannelId: guild.systemChannelId,
+          levelingEnabled: true,
+          welcomeEnabled: false,
+          automodEnabled: false,
         },
       });
+    } else {
+      const storedGuild = storedGuilds.find((g) => g.id === id);
+      if (!storedGuild) continue;
+
+      const updates: Record<string, any> = {};
+
+      if (guild.name !== storedGuild.name) updates.name = guild.name;
+      if (guild.icon !== storedGuild.icon) updates.icon = guild.icon;
+      if (guild.ownerId !== storedGuild.ownerId)
+        updates.ownerId = guild.ownerId;
+      if (guild.systemChannelId !== storedGuild.systemChannelId) {
+        updates.systemChannelId = guild.systemChannelId;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        client.logs.info(`Updating guild ${id} with new data:`, updates);
+        await prisma.guild.update({
+          where: { id },
+          data: updates,
+        });
+      }
     }
   }
+
   for (const g of storedGuilds) {
     if (!g.prefix || g.blacklistedSince) continue;
     client.logs.info(`Loaded guild prefix "${g.prefix}" for guild ${g.id}`);
     client.prefixes.set(g.id, g.prefix);
   }
+
   for (const g of storedGuilds) {
     if (!clientGuilds.has(g.id)) {
-      client.logs.info(
-        `Removing guild ${g.id} from the database (not found in client).`
-      );
-      await prisma.guild.delete({
+      client.logs.info(`Guild ${g.id} not accessible - marking last seen time`);
+      await prisma.guild.update({
         where: { id: g.id },
+        data: {
+          lastSeenAt: new Date(),
+        },
       });
     }
   }
