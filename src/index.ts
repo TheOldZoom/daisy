@@ -1,12 +1,7 @@
 process.stdout.write("\x1Bc");
 
 import "dotenv/config";
-import {
-  GatewayIntentBits,
-  DefaultWebSocketManagerOptions,
-  Events,
-  ClientEvents,
-} from "discord.js";
+import { GatewayIntentBits, DefaultWebSocketManagerOptions } from "discord.js";
 import figlet from "figlet";
 import express, { NextFunction, Request, Response } from "express";
 import Client from "./struct/Client";
@@ -15,7 +10,7 @@ import chalk from "chalk";
 import commas from "./utils/commas";
 
 async function startBot() {
-  console.log(chalk.blue(await figletPromise("DAISY")));
+  console.log(chalk.blue(await Figlet("DAISY")));
   const token =
     process.env.NODE_ENV === "development"
       ? process.env.DEV_TOKEN
@@ -41,7 +36,6 @@ async function startBot() {
       parse: [],
       repliedUser: true,
     },
-    shards: "auto",
   });
 
   console.log(chalk.blue("-".repeat(75)));
@@ -105,7 +99,7 @@ async function startBot() {
 
 startBot();
 
-function figletPromise(text: string): Promise<string> {
+function Figlet(text: string): Promise<string> {
   return new Promise((resolve, reject) => {
     figlet(text, (err, data) => {
       if (err) {
