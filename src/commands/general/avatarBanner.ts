@@ -8,6 +8,7 @@ import {
 import Command from "../../struct/Command";
 import Colors from "../../utils/Colors";
 import { getUserId } from "../../utils/getUserId";
+import { getTargetUser } from "../../utils/getTargetUser";
 
 export default new Command({
   name: "avatarbanner",
@@ -18,21 +19,8 @@ export default new Command({
       ? getUserId(args[0], message.guild)
       : message.author.id;
 
-    if (!target) {
-      return message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(Colors.hotPinkPop)
-            .setDescription(`The user was not found`),
-        ],
-      });
-    }
-
-    const user = await client.users
-      .fetch(target, { force: true })
-      .catch(() => null);
-
-    if (!user) {
+    const targetResponse = await getTargetUser(target, client);
+    if (!targetResponse.success) {
       return message.reply({
         embeds: [
           new EmbedBuilder()
@@ -41,6 +29,7 @@ export default new Command({
         ],
       });
     }
+    const user = targetResponse.user;
 
     const avatarURL = user.displayAvatarURL({ size: 1024 });
     const bannerURL = user.bannerURL({ size: 1024 }) || null;

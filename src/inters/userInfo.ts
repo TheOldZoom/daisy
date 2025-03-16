@@ -2,13 +2,11 @@ import { EmbedBuilder } from "discord.js";
 import Client from "../struct/Client";
 import Colors from "../utils/Colors";
 import prisma from "../struct/Prisma";
+import { getTargetUser } from "../utils/getTargetUser";
 
-export default async (client: Client, target: string) => {
-  const user = await client.users
-    .fetch(target, { force: true })
-    .catch(() => null);
-
-  if (!user) {
+export default async (client: Client, target: string | null) => {
+  const targetResponse = await getTargetUser(target, client);
+  if (!targetResponse.success) {
     return {
       embeds: [
         new EmbedBuilder()
@@ -17,7 +15,8 @@ export default async (client: Client, target: string) => {
       ],
     };
   }
-
+  const user = targetResponse.user;
+  target = user.id;
   const [userDB, userProfile] = await Promise.all([
     prisma.user.findUnique({
       where: { id: target },

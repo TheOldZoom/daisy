@@ -6,6 +6,7 @@ import Client from "../../struct/Client";
 import Colors from "../../utils/Colors";
 import userByCacheOrFetch from "../../utils/userByCacheOrFetch";
 import commas from "../../utils/commas";
+import { getTargetUser } from "../../utils/getTargetUser";
 
 const FM_API_KEY = process.env.FM_KEY;
 const FM_API_URL = "http://ws.audioscrobbler.com/2.0/";
@@ -13,29 +14,24 @@ const FM_API_URL = "http://ws.audioscrobbler.com/2.0/";
 export default new Command({
   name: "lastfm",
   description: "Replies with latest Last.fm scrobble",
-  execute: async (message, args, client): Promise<void> => {
-    const targetId = args[0]
+  execute: async (message, args, client) => {
+    let target = args[0]
       ? getUserId(args[0], message.guild)
       : message.author.id;
 
-    if (!targetId) {
-      const embed = new EmbedBuilder()
-        .setColor(Colors.hotPinkPop)
-        .setDescription("Couldn't find this user");
-      await message.reply({ embeds: [embed] });
-      return;
+    const targetResponse = await getTargetUser(target, client);
+    if (!targetResponse.success) {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(Colors.hotPinkPop)
+            .setDescription("User not found."),
+        ],
+      });
     }
-
-    const userForced = await userByCacheOrFetch(targetId, client);
-    if (!userForced) {
-      const embed = new EmbedBuilder()
-        .setColor(Colors.hotPinkPop)
-        .setDescription("Invalid user mention or ID.");
-      await message.reply({ embeds: [embed] });
-      return;
-    }
-
-    const user = await prisma.user.findUnique({ where: { id: targetId } });
+    const userForced = targetResponse.user;
+    target = userForced.id;
+    const user = await prisma.user.findUnique({ where: { id: target } });
     if (!user || !user.fmUser) {
       const embed = new EmbedBuilder()
         .setColor(Colors.hotPinkPop)

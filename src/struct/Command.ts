@@ -1,7 +1,7 @@
 import { Message, PermissionResolvable } from "discord.js";
 import Client from "./Client";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
+import { dirname, relative } from "path";
+import { Logger } from "./Logger";
 
 export interface Subcommand {
   name: string;
@@ -53,11 +53,29 @@ class Command {
     this.botPermissions = options.botPermissions || [];
     this.userPermissions = options.userPermissions || [];
     this.cooldown = options.cooldown || 3;
-    this.category =
-      options.category ||
-      dirname(__dirname).split("/").pop() ||
-      "Uncategorized";
+    this.category = this.getCommandCategory(options);
     this.example = options.example || "";
+  }
+
+  private getCommandCategory(options: CommandOptions): string {
+    if (options.category) {
+      return options.category;
+    }
+
+    try {
+      const stack = new Error().stack;
+      const matches = stack?.match(/\/commands\/([^/]+)\//);
+      const category = matches?.[1];
+
+      if (category) {
+        return category;
+      }
+
+      return "Uncategorized";
+    } catch (error) {
+      new Logger().error(`Error detecting command category:`, error);
+      return "Uncategorized";
+    }
   }
 
   getSubcommand(name: string): Subcommand | undefined {
@@ -87,7 +105,17 @@ class SubcommandImpl implements Subcommand {
     this.userPermissions = sub.userPermissions || [];
     this.cooldown = sub.cooldown || 0;
     this.category =
-      sub.category || dirname(__dirname).split("/").pop() || "Uncategorized";
+      sub.category ||
+      (() => {
+        try {
+          return (
+            require.main?.filename.split("src/commands/")[1].split("/")[0] ||
+            "Uncategorized"
+          );
+        } catch {
+          return "Uncategorized";
+        }
+      })();
     this.example = sub.example || "";
   }
 

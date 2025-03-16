@@ -12,20 +12,10 @@ export default new Command({
   description: "Replies with how gay a user is",
   aliases: ["gay"],
   execute: async (message, args, client) => {
-    const target = args[0]
-      ? getUserId(args[0], message.guild)
-      : message.author.id;
-
-    if (!target) {
-      return message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(Colors.hotPinkPop)
-            .setDescription(`The user was not found`),
-        ],
-      });
-    }
-
-    await message.reply(await gayRate(client, target));
+    const target = (
+      args[0] ? getUserId(args[0], message.guild) : message.author.id
+    ) as string;
+    const embed = await gayRate(client, target);
+    await message.reply({ embeds: [embed] });
   },
 });

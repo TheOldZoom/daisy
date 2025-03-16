@@ -11,6 +11,14 @@ export default async (id: string, client: Client) => {
       console.error("Failed to fetch user:", error);
       return null;
     }
+  } else if (user.banner === undefined) {
+    client.logs.log("undefined banner");
+    try {
+      user = await client.users.fetch(id);
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+      return null;
+    }
   }
 
   return user as User;

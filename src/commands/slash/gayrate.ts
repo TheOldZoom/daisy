@@ -14,16 +14,8 @@ export default new Slash({
     .setIntegrationTypes(0, 1) as SlashCommandBuilder,
   async execute(interaction, client) {
     const target = interaction.options?.getUser("user") || interaction.user;
-    if (!target) {
-      return interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(Colors.hotPinkPop)
-            .setDescription(`The user was not found`),
-        ],
-      });
-    }
 
-    await interaction.reply(await gayRate(client, target.id));
+    const embed = await gayRate(client, target.id);
+    await interaction.reply({ embeds: [embed] });
   },
 });

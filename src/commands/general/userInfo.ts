@@ -14,15 +14,6 @@ export default new Command({
       ? getUserId(args[0], message.guild)
       : message.author.id;
 
-    if (!target) {
-      return message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(Colors.hotPinkPop)
-            .setDescription(`The user was not found`),
-        ],
-      });
-    }
     await message.reply(await userInfo(client, target));
   },
 });

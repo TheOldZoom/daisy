@@ -1,38 +1,36 @@
 import { EmbedBuilder } from "discord.js";
 import Colors from "../utils/Colors";
 import Client from "../struct/Client";
-import userByCacheOrFetch from "../utils/userByCacheOrFetch";
+import { getTargetUser } from "../utils/getTargetUser";
 
 const usersToGayRate = ["778079465694691329", "1189669459263238280"];
 
-export default async (client: Client, target: string) => {
-  const user = await userByCacheOrFetch(target, client);
+export default async (
+  client: Client,
+  target: string
+): Promise<EmbedBuilder> => {
+  const targetResult = await getTargetUser(target, client);
 
-  if (!user) {
-    return {
-      embeds: [
-        new EmbedBuilder()
-          .setColor(Colors.hotPinkPop)
-          .setDescription("User not found."),
-      ],
-    };
+  if (!targetResult.success) {
+    return new EmbedBuilder()
+      .setColor(Colors.hotPinkPop)
+      .setDescription(targetResult.error);
   }
+
+  const { user } = targetResult;
   let gayrate = Math.ceil(Math.random() * 100);
 
-  if (usersToGayRate.includes(target)) {
+  if (usersToGayRate.includes(user.id)) {
     gayrate = 100;
   }
 
   const progressBar = gayProgressBar(gayrate);
 
-  const embed = new EmbedBuilder()
+  return new EmbedBuilder()
     .setColor(Colors.sunshineYellow)
     .setDescription(
       `**${user.username}** is ${gayrate}% gay\n\n${progressBar}`
     );
-  return {
-    embeds: [embed],
-  };
 };
 
 function gayProgressBar(percent: number): string {
