@@ -20,6 +20,7 @@ class Client extends DiscordClient {
   public prefix: string;
   public eventTimeTracker: Collection<string, number[]>;
   public lastLoggedMinute?: number;
+  public slashCommands: Collection<string, any>;
 
   constructor(options: ClientOptions) {
     super(options);
@@ -33,6 +34,7 @@ class Client extends DiscordClient {
     this.blacklists = new Collection();
     this.prefix = "d.";
     this.eventTimeTracker = new Collection();
+    this.slashCommands = new Collection();
   }
 
   async loadCommands(commandsPath?: string) {
@@ -62,10 +64,12 @@ class Client extends DiscordClient {
 
       for (const filePath of commandFiles) {
         const command = await import(filePath);
-
         const commandModule = command.default || command;
 
-        if ("name" in commandModule && "execute" in commandModule) {
+        if ("data" in commandModule) {
+          this.slashCommands.set(commandModule.data.name, commandModule);
+          this.logs.info(`SLASH COMMAND ${commandModule.data.name} loaded`);
+        } else if ("name" in commandModule && "execute" in commandModule) {
           this.commands.set(commandModule.name, commandModule);
           this.logs.info(`COMMAND ${commandModule.name} loaded`);
         } else {
