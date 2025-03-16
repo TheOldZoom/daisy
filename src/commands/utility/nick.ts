@@ -1,4 +1,7 @@
+import { EmbedBuilder } from "discord.js";
 import Command from "../../struct/Command";
+import Colors from "../../utils/Colors";
+import escapeMarkdown from "../../utils/escapeMarkdown";
 
 export default new Command({
   name: "nickme",
@@ -19,7 +22,15 @@ export default new Command({
 
     try {
       await message.member.setNickname(newNick);
-      return message.reply(`Successfully changed your nickname to: ${newNick}`);
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(Colors.hotPinkPop)
+            .setDescription(
+              `Successfully updated your nickname to **${escapeMarkdown(newNick)}**`
+            ),
+        ],
+      });
     } catch (error) {
       console.error("Error changing nickname:", error);
       return message.reply(
