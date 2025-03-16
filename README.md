@@ -22,7 +22,7 @@ Join the [Discord Server](https://discord.gg/GYusH2ZTyJ) as well.
 - [ ] Add a feature to allow server admins to create and manage custom commands.
 - [x] Implement a permission system to control access to commands and features.
 - [ ] Add a feature to allow users to manage their profiles and settings.
-- [ ] Improve userInfo command.
+- [?] Improve userInfo command.
 
 ## License
 
