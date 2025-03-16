@@ -12,7 +12,11 @@ import { dirname, relative } from "path";
 import { Logger } from "./Logger";
 
 export interface GuildMessage extends Message {
-  guild: Guild;
+  guild: Guild & {
+    members: Guild["members"] & {
+      me: NonNullable<Guild["members"]["me"]>;
+    };
+  };
   member: GuildMember;
   channel: TextChannel | NewsChannel;
 }
