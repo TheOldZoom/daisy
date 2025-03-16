@@ -2,19 +2,16 @@ import { EmbedBuilder, Message, TextChannel, WebhookClient } from "discord.js";
 import groq from "../struct/Groq";
 import Client from "../struct/Client";
 import Colors from "./Colors";
+import { GuildMessage } from "../struct/Command";
 
 async function getAIResponse(
-  message: Message,
+  message: GuildMessage,
   client: Client,
   question: string
 ): Promise<string | null> {
   const maxLength = 2000;
 
   try {
-    if (!(message.channel instanceof TextChannel)) {
-      throw new Error("This command can only be used in text channels.");
-    }
-
     await message.channel.sendTyping();
 
     const messageHistory =

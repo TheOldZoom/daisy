@@ -2,6 +2,7 @@ import { EmbedBuilder, Message, TextChannel } from "discord.js";
 import Client from "../../struct/Client";
 import Colors from "../../utils/Colors";
 import getAIResponse from "../../utils/getAIResponse";
+import { GuildMessage } from "../../struct/Command";
 
 export default {
   async execute(message: Message, client: Client) {
@@ -248,7 +249,7 @@ async function handleAIReply(
 
         await message.channel.sendTyping();
         const answer = await getAIResponse(
-          message,
+          message as GuildMessage,
           client,
           question || message.content
         );
@@ -270,7 +271,11 @@ async function handleAIReply(
       );
 
       await message.channel.sendTyping();
-      const answer = await getAIResponse(message, client, question);
+      const answer = await getAIResponse(
+        message as GuildMessage,
+        client,
+        question
+      );
       if (!answer) return;
 
       return message.reply(answer);

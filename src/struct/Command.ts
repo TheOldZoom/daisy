@@ -1,12 +1,26 @@
-import { Message, PermissionResolvable } from "discord.js";
+import {
+  Message,
+  PermissionResolvable,
+  Guild,
+  GuildMember,
+  TextChannel,
+  NewsChannel,
+  ForumChannel,
+} from "discord.js";
 import Client from "./Client";
 import { dirname, relative } from "path";
 import { Logger } from "./Logger";
 
+export interface GuildMessage extends Message {
+  guild: Guild;
+  member: GuildMember;
+  channel: TextChannel | NewsChannel;
+}
+
 export interface Subcommand {
   name: string;
   description?: string;
-  execute: (message: Message, args: string[], client: Client) => void;
+  execute: (message: GuildMessage, args: string[], client: Client) => void;
   subs?: Subcommand[];
   devOnly?: boolean;
   botPermissions?: PermissionResolvable[];
@@ -20,7 +34,7 @@ export interface CommandOptions {
   name: string;
   description?: string;
   aliases?: string[];
-  execute?: (message: Message, args: string[], client: Client) => void;
+  execute?: (message: GuildMessage, args: string[], client: Client) => void;
   subs?: Subcommand[];
   devOnly?: boolean;
   botPermissions?: PermissionResolvable[];
@@ -34,7 +48,11 @@ class Command {
   public name: string;
   public description: string;
   public aliases: string[];
-  public execute?: (message: Message, args: string[], client: Client) => void;
+  public execute?: (
+    message: GuildMessage,
+    args: string[],
+    client: Client
+  ) => void;
   public subs: Subcommand[];
   public devOnly?: boolean;
   public botPermissions?: PermissionResolvable[];
@@ -86,7 +104,11 @@ class Command {
 class SubcommandImpl implements Subcommand {
   public name: string;
   public description: string;
-  public execute: (message: Message, args: string[], client: Client) => void;
+  public execute: (
+    message: GuildMessage,
+    args: string[],
+    client: Client
+  ) => void;
   public subs: Subcommand[];
   public devOnly?: boolean;
   public botPermissions?: PermissionResolvable[];
