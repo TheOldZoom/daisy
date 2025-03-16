@@ -188,7 +188,7 @@ model guildBannedWord {
   @@unique([word, settingsId])
 }
 
-model Status {
+model status {
   id   Int     @id @default(autoincrement())
   text String
   type String
