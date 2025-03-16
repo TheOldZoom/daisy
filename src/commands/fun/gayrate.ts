@@ -3,8 +3,9 @@ import Command from "../../struct/Command";
 import Colors from "../../utils/Colors";
 import { getUserId } from "../../utils/getUserId";
 import userByCacheOrFetch from "../../utils/userByCacheOrFetch";
+import gayRate from "../../inters/gayRate";
 
-const usersToGayRate = ["778079465694691329"];
+const usersToGayRate = ["778079465694691329", "1189669459263238280"];
 
 export default new Command({
   name: "gayrate",
@@ -25,41 +26,6 @@ export default new Command({
       });
     }
 
-    const user = await userByCacheOrFetch(target, client);
-
-    if (!user) {
-      return message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(Colors.hotPinkPop)
-            .setDescription("User not found."),
-        ],
-      });
-    }
-    let gayrate = Math.ceil(Math.random() * 100);
-
-    if (usersToGayRate.includes(target)) {
-      gayrate = 100;
-    }
-
-    const progressBar = createProgressBar(gayrate);
-
-    const embed = new EmbedBuilder()
-      .setColor(Colors.sunshineYellow)
-      .setDescription(
-        `**${user.username}** is ${gayrate}% gay\n\n${progressBar}`
-      );
-
-    await message.reply({ embeds: [embed] });
+    await message.reply(await gayRate(client, target));
   },
 });
-
-function createProgressBar(percent: number): string {
-  const filledChar = "🏳️‍🌈";
-  const emptyChar = "⬜";
-  const totalBars = 10;
-  const filledBars = Math.round((percent / 100) * totalBars);
-  const emptyBars = totalBars - filledBars;
-
-  return filledChar.repeat(filledBars) + emptyChar.repeat(emptyBars);
-}
