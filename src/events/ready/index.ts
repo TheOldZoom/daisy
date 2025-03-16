@@ -93,6 +93,10 @@ export function processStatus(
     /{time}/g,
     formatUptime(client.uptime)
   );
+  processedStatus = processedStatus.replace(
+    /{epm}/g,
+    String(client.eventPerMinutes())
+  );
   return processedStatus;
 }
 

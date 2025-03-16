@@ -1,7 +1,12 @@
 process.stdout.write("\x1Bc");
 
 import "dotenv/config";
-import { GatewayIntentBits, DefaultWebSocketManagerOptions } from "discord.js";
+import {
+  GatewayIntentBits,
+  DefaultWebSocketManagerOptions,
+  Events,
+  ClientEvents,
+} from "discord.js";
 import figlet from "figlet";
 import express, { NextFunction, Request, Response } from "express";
 import Client from "./struct/Client";
@@ -36,6 +41,7 @@ async function startBot() {
       parse: [],
       repliedUser: true,
     },
+    shards: "auto",
   });
 
   console.log(chalk.blue("-".repeat(75)));

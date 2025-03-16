@@ -1,4 +1,10 @@
-import { ClientOptions, Collection, Client as DiscordClient } from "discord.js";
+import {
+  ClientEvents,
+  ClientOptions,
+  Collection,
+  Client as DiscordClient,
+  Events,
+} from "discord.js";
 import { Logger } from "./Logger";
 import fs from "fs";
 import path from "path";
@@ -12,6 +18,9 @@ class Client extends DiscordClient {
   public cooldowns: Collection<string, number>;
   public blacklists: Collection<string, Date>;
   public prefix: string;
+  public eventTimeTracker: Collection<string, number[]>;
+  public lastLoggedMinute?: number;
+
   constructor(options: ClientOptions) {
     super(options);
     this.logs = new Logger({
@@ -23,6 +32,7 @@ class Client extends DiscordClient {
     this.cooldowns = new Collection();
     this.blacklists = new Collection();
     this.prefix = "d.";
+    this.eventTimeTracker = new Collection();
   }
 
   async loadCommands(commandsPath?: string) {
@@ -133,16 +143,80 @@ class Client extends DiscordClient {
         error instanceof Error ? error.message : String(error)
       );
     }
+
+    Object.keys(Events).forEach((eventKey) => {
+      const eventName = Events[eventKey as keyof typeof Events];
+      const eventsToIgnore = ["debug", "raw"];
+
+      if (eventsToIgnore.includes(eventName)) return;
+
+      if (!this.eventTimeTracker.has(eventName)) {
+        this.eventTimeTracker.set(eventName, []);
+      }
+
+      this.on(eventName as keyof ClientEvents, (...args) => {
+        const timestamps = this.eventTimeTracker.get(eventName);
+        if (timestamps) {
+          timestamps.push(Date.now());
+        }
+      });
+    });
   }
 
   async initialize(options?: { commandsPath?: string; eventsPath?: string }) {
     await this.loadCommands(options?.commandsPath);
     try {
       await this.loadEvents(options?.eventsPath);
+
+      setInterval(() => {
+        const currentTime = Date.now();
+
+        let totalValidEvents = 0;
+
+        this.eventTimeTracker.forEach((timestamps, eventName) => {
+          const eventsInLastMinute = timestamps.filter(
+            (timestamp) => currentTime - timestamp < 60000
+          );
+
+          if (eventsInLastMinute.length > 0) {
+            this.eventTimeTracker.set(eventName, eventsInLastMinute);
+            totalValidEvents += eventsInLastMinute.length;
+          } else {
+            this.eventTimeTracker.set(eventName, []);
+          }
+        });
+
+        if (!this.readyTimestamp) return;
+
+        const elapsedMinutes =
+          Math.floor((Date.now() - this.readyTimestamp) / 60000) + 1;
+
+        this.logs.debug(
+          `${totalValidEvents} events occurred in the ${this.ordinal(elapsedMinutes)} minute`
+        );
+      }, 60000);
     } catch (error) {
-      this.logs.error("Error during event loading");
-      this.logs.error(String(error));
+      this.logs.error("Error during event loading", error);
     }
+  }
+
+  eventPerMinutes(): number {
+    const currentTime = Date.now();
+    let totalValidEvents = 0;
+
+    this.eventTimeTracker.forEach((timestamps) => {
+      const validEvents = timestamps.filter(
+        (timestamp) => currentTime - timestamp < 60000
+      );
+      totalValidEvents += validEvents.length;
+    });
+
+    return totalValidEvents;
+  }
+  ordinal(n: number): string {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
   }
 }
 

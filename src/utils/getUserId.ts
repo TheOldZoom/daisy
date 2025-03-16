@@ -9,8 +9,9 @@ export function getUserId(input: string, guild?: Guild | null): string | null {
   if (guild) {
     const member = guild.members.cache.find(
       (member) =>
-        member.user.username.toLowerCase().includes(input.toLowerCase()) ||
-        member.displayName.toLowerCase().includes(input.toLowerCase())
+        member.user.username.toLowerCase().startsWith(input.toLowerCase()) ||
+        member.displayName.toLowerCase().startsWith(input.toLowerCase()) ||
+        member.user?.displayName.toLowerCase().startsWith(input.toLowerCase())
     );
     return member ? member.user.id : null;
   }

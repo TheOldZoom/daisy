@@ -1,13 +1,17 @@
 {
   "name": "daisy",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "type": "commonjs",
   "devDependencies": {
     "@types/express": "^4.17.13",
+    "@types/figlet": "^1.7.0",
     "@types/node": "^18.0.0",
     "nodemon": "^3.1.9",
     "prettier": "^3.5.3",
     "prisma": "^6.4.1",
+    "ts-node-dev": "^2.0.0",
+    "tsc-watch": "^6.2.1",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   },
@@ -24,6 +28,7 @@
   "dependencies": {
     "@prisma/client": "^6.4.1",
     "chalk": "^5.4.1",
+    "discord-hybrid-sharding": "^2.2.5",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

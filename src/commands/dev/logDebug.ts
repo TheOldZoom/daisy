@@ -2,6 +2,7 @@ import Command from "../../struct/Command";
 
 export default new Command({
   name: "logDebug",
+  aliases: ["ld"],
   description: "Set or disable debug mode.",
   execute: async (message, args, client) => {
     client.logs.setDebug(!client.logs.debugOption);

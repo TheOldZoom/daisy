@@ -18,8 +18,15 @@ export default new Command({
       ? getUserId(args[0], message.guild)
       : message.author.id;
 
-    if (!target) return;
-
+    if (!target) {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(Colors.hotPinkPop)
+            .setDescription(`The user was not found`),
+        ],
+      });
+    }
     const user = await client.users
       .fetch(target, { force: true })
       .catch(() => null);
