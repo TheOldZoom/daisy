@@ -1,4 +1,8 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  SlashCommandBuilder,
+} from "discord.js";
 import Slash from "../../struct/Slash";
 import userInfo from "../../inters/userInfo";
 import Colors from "../../utils/Colors";
@@ -9,11 +13,11 @@ export default new Slash({
     .setDescription(`Get user's information`)
     .addUserOption((o) =>
       o.setName(`user`).setDescription("The user to get the information from.")
-    )
-    .setContexts(0, 1, 2)
-    .setIntegrationTypes(0, 1) as SlashCommandBuilder,
+    ),
   async execute(interaction, client) {
-    const target = interaction.options?.getUser("user") || interaction.user;
+    if (!(interaction instanceof ChatInputCommandInteraction)) return;
+
+    const target = interaction.options.getUser("user") || interaction.user;
     if (!target) {
       return interaction.reply({
         embeds: [
@@ -23,8 +27,8 @@ export default new Slash({
         ],
       });
     }
-    await interaction.deferReply();
 
+    await interaction.deferReply();
     await interaction.followUp(await userInfo(client, target.id));
   },
 });

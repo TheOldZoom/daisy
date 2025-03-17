@@ -222,6 +222,58 @@ class Client extends DiscordClient {
     const v = n % 100;
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   }
+
+  async reloadCommand(commandPath: string) {
+    try {
+      const commandName = path.basename(commandPath).replace(/\.(ts|js)$/, "");
+
+      this.commands.delete(commandName);
+      this.slashCommands.delete(commandName);
+
+      delete require.cache[require.resolve(commandPath)];
+
+      const command = await import(commandPath);
+      const commandModule = command.default || command;
+
+      if ("data" in commandModule) {
+        this.slashCommands.set(commandModule.data.name, commandModule);
+        this.logs.info(`Reloaded SLASH COMMAND ${commandModule.data.name}`);
+      } else if ("name" in commandModule && "execute" in commandModule) {
+        this.commands.set(commandModule.name, commandModule);
+        this.logs.info(`Reloaded COMMAND ${commandModule.name}`);
+      }
+    } catch (error) {
+      this.logs.error(`Failed to reload command: ${error}`);
+    }
+  }
+
+  async reloadEvent(eventPath: string) {
+    try {
+      const eventName = path.basename(path.dirname(eventPath));
+
+      const existingHandlers = this.events.get(eventName);
+      if (existingHandlers) {
+        this.removeAllListeners(eventName);
+        this.events.delete(eventName);
+      }
+
+      delete require.cache[require.resolve(eventPath)];
+
+      const eventModule = await import(eventPath);
+      const handler =
+        eventModule.default?.execute ||
+        eventModule.execute ||
+        eventModule.default;
+
+      if (typeof handler === "function") {
+        this.on(eventName, (...args) => handler(...args, this));
+        this.events.set(eventName, [handler]);
+        this.logs.info(`Reloaded EVENT ${eventName}`);
+      }
+    } catch (error) {
+      this.logs.error(`Failed to reload event: ${error}`);
+    }
+  }
 }
 
 export default Client;

@@ -1,34 +1,43 @@
 import {
   ChatInputCommandInteraction,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  ContextMenuCommandBuilder,
+  InteractionResponse,
+  MessageContextMenuCommandInteraction,
   SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
 } from "discord.js";
 import Client from "./Client";
 
-export interface SlashOptions {
-  data: SlashCommandBuilder;
-  execute: (interaction: ChatInputCommandInteraction, client: Client) => void;
+type SlashCommandData =
+  | SlashCommandBuilder
+  | SlashCommandOptionsOnlyBuilder
+  | ContextMenuCommandBuilder;
 
+export type CommandInteraction =
+  | ChatInputCommandInteraction
+  | MessageContextMenuCommandInteraction;
+
+export interface SlashOptions {
+  data: SlashCommandData;
+  execute: (
+    interaction: CommandInteraction,
+    client: Client
+  ) => Promise<InteractionResponse | void> | void;
   cooldown?: number;
 }
 
 class Slash {
-  public data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
+  public data: SlashCommandData;
   public execute: (
-    interaction: ChatInputCommandInteraction,
+    interaction: CommandInteraction,
     client: Client
-  ) => void;
+  ) => Promise<InteractionResponse | void> | void;
   public cooldown: number;
 
   constructor(options: SlashOptions) {
     this.data = options.data;
     this.execute = options.execute;
     this.cooldown = options.cooldown || 3;
-  }
-
-  public toJSON(): RESTPostAPIChatInputApplicationCommandsJSONBody {
-    return this.data.toJSON();
   }
 }
 

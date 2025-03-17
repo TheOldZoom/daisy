@@ -8,6 +8,7 @@ export default {
   async execute(message: Message, client: Client) {
     if (message.author.bot || !message.inGuild()) return;
     if (!message.channel.isSendable()) return;
+    if (!(message.channel instanceof TextChannel)) return;
 
     const botMention = `<@${client.user?.id}>`;
     if (message.content.toLowerCase().startsWith(botMention.toLowerCase())) {
@@ -248,6 +249,7 @@ async function handleAIReply(
         );
 
         await message.channel.sendTyping();
+
         const answer = await getAIResponse(
           message as GuildMessage,
           client,
