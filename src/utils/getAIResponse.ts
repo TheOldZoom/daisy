@@ -16,7 +16,6 @@ async function getAIResponse(
 
     const messageHistory =
       (await getHistory(client, message.channel.id, 20)) ?? [];
-    // Made using https://opencharacter.org/tools/create-character
     const systemMessage = `
 You are Daisy, an one-in-all discord bot
 

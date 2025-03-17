@@ -11,14 +11,12 @@ export default async (client: Client) => {
   logDivider();
   const users = await prisma.user.findMany();
   client.logs.info(`Loaded ${users.length} users from the database.`);
-  client.logs.debug(users);
   client.logs.info("Loading users..");
   await loadUsers(client, users);
   client.logs.info("Loaded users.");
   logDivider();
   const guilds = await prisma.guild.findMany();
   client.logs.info(`Loaded ${guilds.length} guilds from the database.`);
-  client.logs.debug(guilds);
   client.logs.info("Loading guilds..");
   await loadGuilds(client, guilds);
   client.logs.info("Loaded guilds.");
@@ -40,11 +38,15 @@ async function loadUsers(client: Client, users: user[]) {
 }
 
 async function loadGuilds(client: Client, storedGuilds: guild[]) {
-  const storedGuildIDs = new Set(storedGuilds.map((g) => g.id));
+  const storedGuildMap = new Map(storedGuilds.map((g) => [g.id, g]));
   const clientGuilds = client.guilds.cache;
 
   for (const [id, guild] of clientGuilds) {
-    if (!storedGuildIDs.has(id)) {
+    client.logs.info(`Loading guild: ${guild.name} (${id})...`);
+
+    let storedGuild = storedGuildMap.get(id);
+
+    if (!storedGuild) {
       client.logs.info(`Adding missing guild ${id} to the database.`);
       await prisma.guild.create({
         data: {
@@ -60,10 +62,8 @@ async function loadGuilds(client: Client, storedGuilds: guild[]) {
           automodEnabled: false,
         },
       });
+      client.logs.info(`Guild ${id} successfully added.`);
     } else {
-      const storedGuild = storedGuilds.find((g) => g.id === id);
-      if (!storedGuild) continue;
-
       const updates: Record<string, any> = {};
 
       if (guild.name !== storedGuild.name) updates.name = guild.name;
@@ -75,31 +75,33 @@ async function loadGuilds(client: Client, storedGuilds: guild[]) {
       }
 
       if (Object.keys(updates).length > 0) {
-        client.logs.info(`Updating guild ${id} with new data:`, updates);
-        await prisma.guild.update({
-          where: { id },
-          data: updates,
+        client.logs.info(`Updating guild ${id} with new data:`);
+        Object.entries(updates).forEach(([key, value]) => {
+          client.logs.info(`   - ${key}: ${value}`);
         });
+        await prisma.guild.update({ where: { id }, data: updates });
+        client.logs.info(`Guild ${id} successfully updated.`);
+      } else {
+        client.logs.info(`Guild ${id} is up-to-date.`);
+      }
+
+      if (storedGuild.prefix && !storedGuild.blacklistedSince) {
+        client.logs.info(
+          `Loaded prefix "${storedGuild.prefix}" for guild ${id}`
+        );
+        client.prefixes.set(id, storedGuild.prefix);
       }
     }
-  }
 
-  for (const g of storedGuilds) {
-    if (!g.prefix || g.blacklistedSince) continue;
-    client.logs.info(`Loaded guild prefix "${g.prefix}" for guild ${g.id}`);
-    client.prefixes.set(g.id, g.prefix);
-  }
-
-  for (const g of storedGuilds) {
-    if (!clientGuilds.has(g.id)) {
-      client.logs.info(`Guild ${g.id} not accessible - marking last seen time`);
+    if (!clientGuilds.has(id)) {
+      client.logs.warn(`Guild ${id} not accessible - marking last seen time.`);
       await prisma.guild.update({
-        where: { id: g.id },
-        data: {
-          lastSeenAt: new Date(),
-        },
+        where: { id },
+        data: { lastSeenAt: new Date() },
       });
     }
+
+    logDivider();
   }
 }
 

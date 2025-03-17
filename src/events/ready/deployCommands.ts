@@ -32,7 +32,6 @@ export default async (client: Client) => {
 
     if (hasChanges) {
       client.logs.info("Changes detected in commands. Updating...");
-      console.log(newCommands);
       await rest.put(Routes.applicationCommands(applicationId), {
         body: newCommands,
       });

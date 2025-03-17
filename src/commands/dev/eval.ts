@@ -96,13 +96,11 @@ const utils = {
 
   db: prisma,
 
-  // Misc helpers
   commas,
   Colors,
   inspect: (obj: any) => inspect(obj, { depth: 2, colors: true }),
 };
 
-// Now modify the evalCode function to include utils
 async function evalCode(
   code: string,
   message: Message,
