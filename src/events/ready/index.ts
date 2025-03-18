@@ -6,21 +6,31 @@ import { ActivityType } from "discord.js";
 
 export default async (client: Client) => {
   client.logs.log(
-    `Logged in as ${chalk.blue(client.user?.username ?? "Unknown")}`
+    `Successfully logged in as ${chalk.blue(client.user?.username ?? "Unknown")}`
   );
   logDivider();
+
+  // Load users from the database
   const users = await prisma.user.findMany();
-  client.logs.info(`Loaded ${users.length} users from the database.`);
-  client.logs.info("Loading users..");
+  client.logs.info(
+    `Successfully loaded ${users.length} user(s) from the database.`
+  );
+  client.logs.info("Initializing user data...");
   await loadUsers(client, users);
-  client.logs.info("Loaded users.");
+  client.logs.info("User data loaded successfully.");
   logDivider();
+
+  // Load guilds from the database
   const guilds = await prisma.guild.findMany();
-  client.logs.info(`Loaded ${guilds.length} guilds from the database.`);
-  client.logs.info("Loading guilds..");
+  client.logs.info(
+    `Successfully loaded ${guilds.length} guild(s) from the database.`
+  );
+  client.logs.info("Initializing guild data...");
   await loadGuilds(client, guilds);
-  client.logs.info("Loaded guilds.");
+  client.logs.info("Guild data loaded successfully.");
   logDivider();
+
+  // Start updating bot's presence status
   presence(client);
 };
 
@@ -30,6 +40,8 @@ async function loadUsers(client: Client, users: user[]) {
     client.logs.info(`Loaded self prefix "${u.selfprefix}" for user ${u.id}`);
     client.prefixes.set(u.id, u.selfprefix);
   }
+
+  // Load blacklist data for users
   for (const u of users) {
     if (!u.blacklistedSince) continue;
     client.logs.debug(`Loaded blacklist for user ${u.id}`);
@@ -39,10 +51,10 @@ async function loadUsers(client: Client, users: user[]) {
 
 async function loadGuilds(client: Client, storedGuilds: guild[]) {
   const storedGuildMap = new Map(storedGuilds.map((g) => [g.id, g]));
-  const clientGuilds = client.guilds.cache;
 
-  for (const [id, guild] of clientGuilds) {
-    client.logs.info(`Loading guild: ${guild.name} (${id})...`);
+  for (const guild of client.guilds.cache.values()) {
+    const id = guild.id;
+    client.logs.info(`Processing guild: ${guild.name} (${id})...`);
 
     let storedGuild = storedGuildMap.get(id);
 
@@ -62,7 +74,7 @@ async function loadGuilds(client: Client, storedGuilds: guild[]) {
           automodEnabled: false,
         },
       });
-      client.logs.info(`Guild ${id} successfully added.`);
+      client.logs.info(`Guild ${id} added to the database.`);
     } else {
       const updates: Record<string, any> = {};
 
@@ -70,38 +82,43 @@ async function loadGuilds(client: Client, storedGuilds: guild[]) {
       if (guild.icon !== storedGuild.icon) updates.icon = guild.icon;
       if (guild.ownerId !== storedGuild.ownerId)
         updates.ownerId = guild.ownerId;
-      if (guild.systemChannelId !== storedGuild.systemChannelId) {
+      if (guild.systemChannelId !== storedGuild.systemChannelId)
         updates.systemChannelId = guild.systemChannelId;
-      }
+      if (storedGuild.lastSeenAt) updates.lastSeenAt = null;
 
       if (Object.keys(updates).length > 0) {
         client.logs.info(`Updating guild ${id} with new data:`);
         Object.entries(updates).forEach(([key, value]) => {
           client.logs.info(`   - ${key}: ${value}`);
         });
-        await prisma.guild.update({ where: { id }, data: updates });
-        client.logs.info(`Guild ${id} successfully updated.`);
-      } else {
-        client.logs.info(`Guild ${id} is up-to-date.`);
-      }
 
-      if (storedGuild.prefix && !storedGuild.blacklistedSince) {
-        client.logs.info(
-          `Loaded prefix "${storedGuild.prefix}" for guild ${id}`
-        );
-        client.prefixes.set(id, storedGuild.prefix);
+        await prisma.guild.update({ where: { id }, data: updates });
+        client.logs.info(`Guild ${id} updated successfully.`);
+      } else {
+        client.logs.info(`Guild ${id} is already up-to-date.`);
       }
     }
 
-    if (!clientGuilds.has(id)) {
-      client.logs.warn(`Guild ${id} not accessible - marking last seen time.`);
+    // Load guild prefix
+    if (storedGuild?.prefix && !storedGuild.blacklistedSince) {
+      client.logs.info(`Loaded prefix "${storedGuild.prefix}" for guild ${id}`);
+      client.prefixes.set(id, storedGuild.prefix);
+    }
+
+    if (typeof logDivider === "function") logDivider();
+  }
+
+  // Check if any stored guilds have left the server
+  for (const [id, g] of storedGuildMap) {
+    const guild = client.guilds.cache.get(id);
+
+    if (!g.lastSeenAt && !guild) {
       await prisma.guild.update({
         where: { id },
         data: { lastSeenAt: new Date() },
       });
+      client.logs.info(`${g.name} (${g.id}) has left us - lastSeenAt updated.`);
     }
-
-    logDivider();
   }
 }
 
@@ -147,6 +164,7 @@ async function presence(client: Client) {
       const shuffledStatuses = statuses.sort(() => 0.5 - Math.random());
       const randomStatus = shuffledStatuses[0];
 
+      // Avoid repeating the same status
       if (randomStatus.text === lastStatus) {
         return setTimeout(updateStatus, 15 * 1000);
       }
@@ -167,7 +185,7 @@ async function presence(client: Client) {
 
       client.user?.setActivity(processedStatus, activityOptions);
       client.logs.debug(
-        `Status updated to: ${processedStatus} (${randomStatus.type})`
+        `Bot status updated to: "${processedStatus}" (${randomStatus.type})`
       );
 
       lastStatus = randomStatus.text;
@@ -178,8 +196,8 @@ async function presence(client: Client) {
     }
   };
 
+  client.logs.info("Status updater initialized and running.");
   await updateStatus();
-  client.logs.info(`Status updater started.`);
 }
 
 function getActivityType(type: string): ActivityType {
@@ -203,10 +221,10 @@ function formatUptime(uptime: number | null): string {
   const hours = Math.floor(minutes / 60);
 
   if (hours >= 1) {
-    return `${hours} hours`;
+    return `${hours} hour${hours > 1 ? "s" : ""}`;
   } else if (minutes >= 1) {
-    return `${minutes} minutes`;
+    return `${minutes} minute${minutes > 1 ? "s" : ""}`;
   } else {
-    return `${seconds} seconds`;
+    return `${seconds} second${seconds > 1 ? "s" : ""}`;
   }
 }

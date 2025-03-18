@@ -1,55 +1,147 @@
-import { EmbedBuilder, Message, TextChannel, WebhookClient } from "discord.js";
-import groq from "../struct/Groq";
-import Client from "../struct/Client";
-import Colors from "./Colors";
+import gemini from "../struct/Gemini";
 import { GuildMessage } from "../struct/Command";
+import Client from "../struct/Client";
+import { Message, TextChannel } from "discord.js";
+
+type QueueItem = {
+  message: GuildMessage;
+  client: Client;
+  question: string;
+  resolve: (value: string | null | PromiseLike<string | null>) => void;
+  reject: (reason?: any) => void;
+};
+
+class AIRequestQueue {
+  private queue: QueueItem[] = [];
+  private processing: boolean = false;
+  private maxConcurrent: number = 2;
+  private activeRequests: number = 0;
+  private cooldownMap: Map<string, number> = new Map();
+  private userCooldown: number = 3000;
+
+  enqueue(item: QueueItem): void {
+    const userId = item.message.author.id;
+    const now = Date.now();
+    const lastRequest = this.cooldownMap.get(userId) || 0;
+
+    if (now - lastRequest < this.userCooldown) {
+      item.reject(`Please wait before making another request.`);
+      return;
+    }
+
+    this.queue.push(item);
+    this.cooldownMap.set(userId, now);
+
+    if (!this.processing) {
+      this.processQueue();
+    }
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.queue.length === 0 || this.activeRequests >= this.maxConcurrent) {
+      if (this.queue.length === 0 && this.activeRequests === 0) {
+        this.processing = false;
+      }
+      return;
+    }
+
+    this.processing = true;
+    this.activeRequests++;
+
+    const item = this.queue.shift()!;
+
+    try {
+      const typingPromise = item.message.channel.sendTyping();
+
+      const response = await this.processAIRequest(
+        item.client,
+        item.message,
+        item.question
+      );
+
+      await typingPromise.catch((err) =>
+        console.error("Typing indicator error:", err)
+      );
+
+      item.resolve(response);
+    } catch (error) {
+      console.error("Error processing queue item:", error);
+      item.reject(error);
+    } finally {
+      this.activeRequests--;
+
+      setTimeout(() => this.processQueue(), 100);
+    }
+  }
+
+  private async processAIRequest(
+    client: Client,
+    message: GuildMessage,
+    question: string
+  ): Promise<string | null> {
+    const maxLength = 2000;
+
+    try {
+      const messageHistory =
+        (await getHistory(client, message.channel.id, 20)) ?? [];
+      const systemMessage = `
+You are Daisy, an all-in-one Discord bot & open source bot, at https://github.com/TheOldZoom/daisy.
+
+When mentioning or referring to a user by name, always format their name with double asterisks like this: **name**
+`;
+
+      const model = gemini.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+      const messages = [
+        {
+          role: "user",
+          parts: [{ text: systemMessage }],
+        },
+        ...messageHistory
+          .filter((msg) => msg.content && msg.content.trim() !== "")
+          .map((msg) => ({
+            role: msg.role === "assistant" ? "model" : "user",
+            parts: [{ text: msg.content }],
+          })),
+      ];
+
+      const result = await model.generateContent({
+        contents: messages,
+      });
+      const responseText =
+        result.response?.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+
+      if (!responseText) {
+        console.warn("Received empty response from AI");
+        return null;
+      }
+
+      return responseText.length > maxLength
+        ? responseText.substring(0, maxLength - 3) + "..."
+        : responseText;
+    } catch (error) {
+      console.error("Error in AI response:", error);
+      return null;
+    }
+  }
+}
+
+const aiQueue = new AIRequestQueue();
 
 async function getAIResponse(
   message: GuildMessage,
   client: Client,
   question: string
 ): Promise<string | null> {
-  const maxLength = 2000;
-
-  try {
-    await message.channel.sendTyping();
-
-    const messageHistory =
-      (await getHistory(client, message.channel.id, 20)) ?? [];
-    const systemMessage = `
-You are Daisy, an one-in-all discord bot
-
-FORMAT FOR FIRST-PERSON SPEECH:
-When mentioning or referring to a user by name, always format their name with double asterisks like this: **name**
-
-`;
-    console.log(messageHistory);
-    const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system" as const,
-          content: systemMessage,
-        },
-        ...messageHistory,
-      ],
+  return new Promise((resolve, reject) => {
+    aiQueue.enqueue({
+      message,
+      client,
+      question,
+      resolve,
+      reject,
     });
-
-    const answer = response.choices[0]?.message?.content;
-
-    if (!answer) {
-      return null;
-    }
-
-    return answer.length > maxLength
-      ? answer.substring(0, maxLength - 3) + "..."
-      : answer;
-  } catch (error) {
-    console.error("Error in AI response:", error);
-    throw new Error(
-      "Sorry, I encountered an error while processing your request."
-    );
-  }
+  });
 }
 
 async function formatUserMessage(

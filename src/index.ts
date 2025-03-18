@@ -32,6 +32,7 @@ async function startBot() {
       GatewayIntentBits.MessageContent,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.GuildModeration,
+      GatewayIntentBits.GuildPresences,
     ],
     allowedMentions: {
       parse: [],

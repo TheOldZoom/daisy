@@ -16,9 +16,7 @@ export default async (guild: Guild, client: Client) => {
         lastSeenAt: new Date(),
       },
     });
-    client.logs.info(
-      `Updated last seen time for guild ${guild.id} in database`
-    );
+    client.logs.info(`Added lastSeenAt for ${guild.name} (${guild.id})`);
   } else {
     client.logs.warn(
       `Guild ${guild.id} not found in database during deletion event`
