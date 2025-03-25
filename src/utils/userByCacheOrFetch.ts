@@ -12,7 +12,6 @@ export default async (id: string, client: Client) => {
       return null;
     }
   } else if (user.banner === undefined) {
-    client.logs.log("undefined banner");
     try {
       user = await client.users.fetch(id);
     } catch (error) {

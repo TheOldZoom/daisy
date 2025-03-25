@@ -51,7 +51,11 @@ function logDeployedCommands(client: Client, commands: any[]) {
   console.log(divider);
   console.log(chalk.yellow("Deployed Slash Commands:"));
   commands.forEach((cmd) => {
-    console.log(chalk.green(`/${cmd.name} - ${cmd.description}`));
+    console.log(
+      chalk.green(
+        cmd.description ? `/${cmd.name} - ${cmd.description}` : cmd.name
+      )
+    );
   });
 
   console.log(divider);

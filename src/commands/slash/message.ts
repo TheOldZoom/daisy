@@ -6,7 +6,6 @@ import {
 } from "discord.js";
 import Slash from "../../struct/Slash";
 import Colors from "../../utils/Colors";
-import gayRate from "../../inters/gayRate";
 import escapeMarkdown from "../../utils/escapeMarkdown";
 
 const DISCORD_EMBED_LIMIT = 4069;

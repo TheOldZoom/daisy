@@ -1,7 +1,11 @@
 process.stdout.write("\x1Bc");
 
 import "dotenv/config";
-import { GatewayIntentBits, DefaultWebSocketManagerOptions } from "discord.js";
+import {
+  GatewayIntentBits,
+  DefaultWebSocketManagerOptions,
+  Partials,
+} from "discord.js";
 import figlet from "figlet";
 import express, { NextFunction, Request, Response } from "express";
 import Client from "./struct/Client";
@@ -32,12 +36,20 @@ async function startBot() {
       GatewayIntentBits.MessageContent,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.GuildModeration,
-      GatewayIntentBits.GuildPresences,
     ],
     allowedMentions: {
       parse: [],
       repliedUser: true,
     },
+
+    partials: [
+      Partials.Channel,
+      Partials.Message,
+      Partials.User,
+      Partials.GuildMember,
+      Partials.Reaction,
+      Partials.ThreadMember,
+    ],
   });
 
   console.log(chalk.blue("-".repeat(75)));
