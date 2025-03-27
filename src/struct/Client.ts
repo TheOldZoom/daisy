@@ -4,6 +4,7 @@ import {
   Collection,
   Client as DiscordClient,
   Events,
+  PermissionResolvable,
 } from "discord.js";
 import { Logger } from "./Logger";
 import fs from "fs";
@@ -21,6 +22,7 @@ class Client extends DiscordClient {
   public eventTimeTracker: Collection<string, number[]>;
   public lastLoggedMinute?: number;
   public slashCommands: Collection<string, any>;
+  public botDefaultPerm: PermissionResolvable[];
 
   constructor(options: ClientOptions) {
     super(options);
@@ -35,6 +37,7 @@ class Client extends DiscordClient {
     this.prefix = "d.";
     this.eventTimeTracker = new Collection();
     this.slashCommands = new Collection();
+    this.botDefaultPerm = ["ReadMessageHistory", "SendMessages", "EmbedLinks"];
   }
 
   async loadCommands(commandsPath?: string) {

@@ -9,9 +9,10 @@ import {
 import figlet from "figlet";
 import express, { NextFunction, Request, Response } from "express";
 import Client from "./struct/Client";
-import { analyzeCodeStats } from "./utils/readFiles";
+import { analyzeCodeStats } from "./utils/services/readFiles";
 import chalk from "chalk";
-import commas from "./utils/commas";
+import commas from "./utils/helpers/commas";
+import divider from "./utils/helpers/divider";
 
 async function startBot() {
   console.log(chalk.blue(await Figlet("DAISY")));
@@ -52,7 +53,7 @@ async function startBot() {
     ],
   });
 
-  console.log(chalk.blue("-".repeat(75)));
+  divider();
 
   const projectDetails = await analyzeCodeStats(process.cwd());
   client.logs.info(`Total Files: ${commas(projectDetails.totalFiles)}`);
@@ -66,7 +67,7 @@ async function startBot() {
     `Largest file: ${projectDetails.largestFile?.path} with ${commas(projectDetails.largestFile?.lines || 0)} lines & ${commas(projectDetails.largestFile?.chars || 0)} Characters`
   );
 
-  console.log(chalk.blue("-".repeat(75)));
+  divider();
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (
