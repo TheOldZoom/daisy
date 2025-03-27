@@ -63,7 +63,7 @@ async function startBot() {
     `Average Characters per File: ${projectDetails.averageChars}`
   );
   client.logs.info(
-    `Largest file: ${projectDetails.largestFile?.path} with ${commas(projectDetails.largestFile?.lines || 0)} lines`
+    `Largest file: ${projectDetails.largestFile?.path} with ${commas(projectDetails.largestFile?.lines || 0)} lines & ${commas(projectDetails.largestFile?.chars || 0)} Characters`
   );
 
   console.log(chalk.blue("-".repeat(75)));

@@ -8,60 +8,46 @@ datasource db {
 }
 
 model user {
-  id               String           @id
+  id               String        @id @default(cuid())
   fmUser           String?
-  selfprefix       String?
+  selfPrefix       String?
   blacklistedSince DateTime?
   timezone         String?
   birthday         String?
-  messages         userMessages[]
-  globalLevel      globalUserLevel?
-  guildLevels      guildUserLevel[]
-  guildMember      guildMember[]
-  guildLevel       guildLevel[]
+  messages         userMessage[]
+  globalLevel      globalLevel?
+  guildMembers     guildMember[]
+  guildLevels      guildLevel[]
 }
 
-model userMessages {
-  id            Int      @id @default(autoincrement())
+model userMessage {
+  id            String   @id @default(cuid()) // Keep this
   guildId       String
   userId        String
   total         Int      @default(0)
   wordCount     Int      @default(0)
   lastMessageAt DateTime @updatedAt
+  user          user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user user @relation(fields: [userId], references: [id])
+  @@unique([guildId, userId])
+  @@index([userId])
+  @@index([guildId])
 }
 
-model globalUserLevel {
+model globalLevel {
   id          Int      @id @default(autoincrement())
   userId      String   @unique
   level       Int      @default(0)
   xp          Int      @default(0)
-  lastLevelUp DateTime
+  lastLevelUp DateTime @default(now())
   rank        Int?
   bonusXP     Int      @default(0)
 
-  user user @relation(fields: [userId], references: [id])
-}
-
-model guildUserLevel {
-  id          Int      @id @default(autoincrement())
-  userId      String
-  guildId     String
-  level       Int      @default(0)
-  xp          Int      @default(0)
-  lastLevelUp DateTime
-  rank        Int?
-  bonusXP     Int      @default(0)
-
-  user  user  @relation(fields: [userId], references: [id])
-  guild guild @relation(fields: [guildId], references: [id])
-
-  @@unique([userId, guildId])
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model guild {
-  id               String    @id
+  id               String    @id @default(cuid())
   name             String?
   prefix           String?
   blacklistedSince DateTime?
@@ -82,7 +68,6 @@ model guild {
   systemChannelId  String?
   welcomeChannelId String?
   logsChannelId    String?
-  guildUserLevel   guildUserLevel[]
 
   @@index([ownerId])
 }
@@ -91,25 +76,29 @@ model guildMember {
   id         Int       @id @default(autoincrement())
   guildId    String
   userId     String
-  nick       String
+  nick       String?
   joinedAt   DateTime  @default(now())
   isMuted    Boolean   @default(false)
   mutedUntil DateTime?
 
-  guild guild             @relation(fields: [guildId], references: [id])
-  user  user              @relation(fields: [userId], references: [id])
+  guild guild             @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  user  user              @relation(fields: [userId], references: [id], onDelete: Cascade)
   roles guildMemberRole[]
 
   @@unique([userId, guildId])
+  @@index([guildId])
+  @@index([userId])
 }
 
 model guildMemberRole {
-  id            Int         @id @default(autoincrement())
+  id            Int    @id @default(autoincrement())
   roleId        String
-  guildMember   guildMember @relation(fields: [guildMemberId], references: [id])
   guildMemberId Int
 
+  guildMember guildMember @relation(fields: [guildMemberId], references: [id], onDelete: Cascade)
+
   @@unique([roleId, guildMemberId])
+  @@index([guildMemberId])
 }
 
 model guildLevel {
@@ -118,20 +107,22 @@ model guildLevel {
   userId      String
   level       Int      @default(0)
   xp          Int      @default(0)
-  lastLevelUp DateTime
+  lastLevelUp DateTime @default(now())
   rank        Int?
   bonusXP     Int      @default(0)
 
-  guild guild @relation(fields: [guildId], references: [id])
-  user  user  @relation(fields: [userId], references: [id])
+  guild guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  user  user  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, guildId])
+  @@index([guildId])
+  @@index([userId])
 }
 
 model guildSettings {
   id      Int    @id @default(autoincrement())
   guildId String @unique
-  guild   guild  @relation(fields: [guildId], references: [id])
+  guild   guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
 
   levelUpMessage   String?
   levelUpChannelId String?
@@ -155,37 +146,41 @@ model guildSettings {
 model guildDefaultRole {
   id            Int           @id @default(autoincrement())
   roleId        String
-  guildSettings guildSettings @relation(fields: [settingsId], references: [id])
   settingsId    Int
+  guildSettings guildSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, settingsId])
+  @@index([settingsId])
 }
 
 model guildExcludedRole {
   id            Int           @id @default(autoincrement())
   roleId        String
-  guildSettings guildSettings @relation(fields: [settingsId], references: [id])
   settingsId    Int
+  guildSettings guildSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, settingsId])
+  @@index([settingsId])
 }
 
 model guildExcludedChannel {
   id            Int           @id @default(autoincrement())
   channelId     String
-  guildSettings guildSettings @relation(fields: [settingsId], references: [id])
   settingsId    Int
+  guildSettings guildSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
 
   @@unique([channelId, settingsId])
+  @@index([settingsId])
 }
 
 model guildBannedWord {
   id            Int           @id @default(autoincrement())
   word          String
-  guildSettings guildSettings @relation(fields: [settingsId], references: [id])
   settingsId    Int
+  guildSettings guildSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
 
   @@unique([word, settingsId])
+  @@index([settingsId])
 }
 
 model status {
