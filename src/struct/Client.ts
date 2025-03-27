@@ -71,7 +71,7 @@ class Client extends DiscordClient {
 
         if ("data" in commandModule) {
           this.slashCommands.set(commandModule.data.name, commandModule);
-          this.logs.info(`SLASH COMMAND ${commandModule.data.name} loaded`);
+          this.logs.info(`SLASH ${commandModule.data.name} loaded`);
         } else if ("name" in commandModule && "execute" in commandModule) {
           this.commands.set(commandModule.name, commandModule);
           this.logs.info(`COMMAND ${commandModule.name} loaded`);
