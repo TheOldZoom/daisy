@@ -8,7 +8,6 @@ import {
   ForumChannel,
 } from "discord.js";
 import Client from "./Client";
-import { dirname, relative } from "path";
 import { Logger } from "./Logger";
 
 export interface GuildMessage extends Message {
