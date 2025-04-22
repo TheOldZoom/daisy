@@ -1,8 +1,4 @@
-# Mr. PoopyButtHole, that one Discord Bot
-
-[Invite now](https://discord.com/oauth2/authorize?client_id=1356428631903174858)
-
-Join the [Discord Server](https://discord.gg/GYusH2ZTyJ) as well.
+# Starter-djs-bot template
 
 ## License
 
